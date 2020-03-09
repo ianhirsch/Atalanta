@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/ress-auto">
+
+    <item
+        android:title="Health"
+        android:icon="@drawable/ic_health"
+        android:id="@+id/navHealth"
+        android:checked="false"
+        />
+
+    <item android:title="Generate"
+        android:icon="@drawable/ic_runningicon"
+        android:id="@+id/navGenerate"
+        android:checked="true"/>
+
+    <item android:title="Profile"
+        android:icon="@drawable/ic_person_black_24dp"
+        android:id="@+id/navProfile"
+        android:checked="false"/>
+
+
+</menu>

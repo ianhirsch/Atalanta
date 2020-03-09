@@ -2,11 +2,18 @@ package com.example.atalanta;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+//import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+
 import android.Manifest;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.app.Fragment;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -25,6 +32,8 @@ public class MainActivity extends FragmentActivity {
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 12;
 
+    Button startButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +46,8 @@ public class MainActivity extends FragmentActivity {
             mMap = googleMap;
             displayMyLocation(); // called in getMapAsync since want map ready then display current marker
         });
-    }
+        loadFragment(new GenerateFragment());
+        }
 
     /**
      * Handles the result of the request for location permissions
@@ -55,7 +65,7 @@ public class MainActivity extends FragmentActivity {
                 displayMyLocation();
         }
     }
-    public  void startButtonClick()
+    public void startButtonClick()
     {
         //Toast.makeText(this, "start button pressed",Toast.LENGTH_SHORT).show();
     }
@@ -85,5 +95,16 @@ public class MainActivity extends FragmentActivity {
             });
         }
     }
+
+    private void loadFragment(Fragment fragment) {
+// create a FragmentManager
+        FragmentManager fm = getFragmentManager();
+// create a FragmentTransaction to begin the transaction and replace theFragment
+        FragmentTransaction fragmentTransaction = fm.beginTransaction();
+// replace the FrameLayout with new Fragment
+        fragmentTransaction.replace(R.id.frameLayout, fragment);
+        fragmentTransaction.commit(); // save the changes
+    }
 }
+
 
