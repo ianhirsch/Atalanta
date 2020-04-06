@@ -21,8 +21,7 @@ public class GenerateFragment extends Fragment {
         view = inflater.inflate(R.layout.generate_fragment, container, false);
         BottomNavigationView v = view.findViewById(R.id.navBar);
         v.setSelectedItemId(R.id.navGenerate);
-// get the reference of Button
-        startButton = (Button) view.findViewById(R.id.start_button);
+
 // perform setOnClickListener on first Button
 //        startButton.setOnClickListener(new View.OnClickListener() {
 //            @Override

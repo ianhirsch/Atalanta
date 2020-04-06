@@ -9,8 +9,8 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start"
-        android:id="@+id/start_button"
+        android:text="Test"
+        android:id="@+id/test_button"
         />
 
     <FrameLayout
