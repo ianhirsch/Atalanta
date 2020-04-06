@@ -6,12 +6,12 @@
     android:id="@+id/fragment_map"
     android:name="com.google.android.gms.maps.SupportMapFragment">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start"
-        android:id="@+id/start_button"
-        />
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Start"-->
+<!--        android:id="@+id/start_button"-->
+<!--        />-->
 
     <FrameLayout
         android:id="@+id/frameLayout"
