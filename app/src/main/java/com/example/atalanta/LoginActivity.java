@@ -10,12 +10,32 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        // Check if logged in already, if yes display info
+        SharedPreferences sharedPreferences = getSharedPreferences("com.example.atalanta", Context.MODE_PRIVATE);
+        Boolean loggedIn = sharedPreferences.getBoolean("loggedIn",false);
+        EditText emailText = (EditText) findViewById(R.id.email);
+        EditText passwordText = (EditText) findViewById(R.id.password);
+        if(loggedIn)
+        {
+            String str = sharedPreferences.getString("email","");
+            String str1 = sharedPreferences.getString("password","");
+            emailText.setText( str);
+            passwordText.setText(str1);
+        }
+        else
+        {
+            emailText.setHint("email");
+            passwordText.setHint("password");
+        }
+
     }
 
     public void onLoginButtonClick(View view) {
@@ -45,6 +65,7 @@ public class LoginActivity extends AppCompatActivity {
             SharedPreferences sharedPreferences = getSharedPreferences("com.example.atalanta", Context.MODE_PRIVATE);
             sharedPreferences.edit().putString("email",str).apply();
             sharedPreferences.edit().putString("password",str2).apply();
+            sharedPreferences.edit().putBoolean("loggedIn",true).apply();
             //go to main activity
             Intent intent = new Intent(this,MainActivity.class);
             startActivity(intent);
@@ -54,5 +75,10 @@ public class LoginActivity extends AppCompatActivity {
     public void onSignupButtonClick(View view) {
         Intent intent = new Intent(LoginActivity.this,SignupActivity.class);
         LoginActivity.this.startActivity(intent);
+    }
+    public void onSignoutButtonClick(View view) {
+        getSharedPreferences("com.example.atalanta",  Context.MODE_PRIVATE).edit().clear().commit();
+        Intent intent = new Intent(this,MainActivity.class);
+        startActivity(intent);
     }
 }

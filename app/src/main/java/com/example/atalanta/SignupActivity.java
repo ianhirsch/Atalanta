@@ -51,9 +51,10 @@ public class SignupActivity extends AppCompatActivity {
         {
             //store key as username in SharedPreference
             SharedPreferences sharedPreferences = getSharedPreferences("com.example.atalanta", Context.MODE_PRIVATE);
-            sharedPreferences.edit().putString("username",str2).apply();
+            sharedPreferences.edit().putString("username",str1).apply();
             sharedPreferences.edit().putString("email",str2).apply();
             sharedPreferences.edit().putString("password",str3).apply();
+            sharedPreferences.edit().putBoolean("loggedIn",true).apply();
             //go to main activity
             Intent intent = new Intent(this,MainActivity.class);
             startActivity(intent);

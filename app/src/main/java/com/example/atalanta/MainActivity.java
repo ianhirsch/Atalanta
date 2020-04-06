@@ -52,7 +52,8 @@ public class MainActivity extends FragmentActivity {
         });
         loadFragment(new GenerateFragment());
 
-        // Test button for accessing login page, waiting for navbar onclick implementation TODO
+        /*
+        // Test button for accessing login page, navbar onclick implemented
         test_button = (Button) findViewById(R.id.test_button);
         test_button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
@@ -60,12 +61,12 @@ public class MainActivity extends FragmentActivity {
                 MainActivity.this.startActivity(intent);
             }
         });
-
+        */
 
         // Display welcome message w/ SharedPreference TODO
         SharedPreferences sharedPreferences = getSharedPreferences("com.example.atalanta", Context.MODE_PRIVATE);
-        String str = sharedPreferences.getString("email","");
-        Toast.makeText(getApplicationContext(),"Welcome "+str+ "!",Toast.LENGTH_SHORT).show();
+        Boolean lgi = sharedPreferences.getBoolean("loggedIn",false);
+        Toast.makeText(getApplicationContext(),"Welcome! Logged In Status: " + lgi,Toast.LENGTH_SHORT).show();
     }
 
     /**

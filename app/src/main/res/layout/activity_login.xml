@@ -10,7 +10,7 @@
         android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:hint="email"
-        android:inputType="textEmailAddress"
+        android:inputType="text"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -48,7 +48,19 @@
         android:text="No account yet? Create one"
         android:clickable="true"
         android:onClick="onSignupButtonClick"/>
-
         />
+    <TextView
+        android:id="@+id/logout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signup"
+        android:layout_marginTop="5dp"
+        android:text="Not you? Sign out"
+        android:clickable="true"
+        android:onClick="onSignoutButtonClick"/>
+    />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
