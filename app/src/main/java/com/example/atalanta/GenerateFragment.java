@@ -31,12 +31,14 @@ public class GenerateFragment extends Fragment {
 
                  switch (item.getItemId()){
                      case R.id.navHealth:
+                         Intent intent_health = new Intent(getActivity(), HealthActivity.class);
+                         startActivity(intent_health);
+                         return true;
 //                         selectedFragment = ItemoneFragment.newInstance();
 //                         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //                         transaction.replace(R.id.content,selectedFragment);
 //                         transaction.addToBackStack(null);
 //                         transaction.commit();
-                         return true;
 
                      case R.id.navGenerate:
 //                         selectedFragment = ItemtwoFragment.newInstance();
