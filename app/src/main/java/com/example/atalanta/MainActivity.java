@@ -7,13 +7,17 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.app.Fragment;
+import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -48,7 +52,7 @@ public class MainActivity extends FragmentActivity {
         });
         loadFragment(new GenerateFragment());
 
-
+        // Test button for accessing login page, waiting for navbar onclick implementation TODO
         test_button = (Button) findViewById(R.id.test_button);
         test_button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
@@ -56,6 +60,12 @@ public class MainActivity extends FragmentActivity {
                 MainActivity.this.startActivity(intent);
             }
         });
+
+
+        // Display welcome message w/ SharedPreference TODO
+        SharedPreferences sharedPreferences = getSharedPreferences("com.example.atalanta", Context.MODE_PRIVATE);
+        String str = sharedPreferences.getString("email","");
+        Toast.makeText(getApplicationContext(),"Welcome "+str+ "!",Toast.LENGTH_SHORT).show();
     }
 
     /**
