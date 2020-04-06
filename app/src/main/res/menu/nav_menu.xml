@@ -4,21 +4,22 @@
     xmlns:app="http://schemas.android.com/apk/ress-auto">
 
     <item
+        android:id="@+id/navHealth"
         android:title="Health"
         android:icon="@drawable/ic_health"
-        android:id="@+id/navHealth"
-        android:checked="false"
         />
 
-    <item android:title="Generate"
-        android:icon="@drawable/ic_runningicon"
+    <item
         android:id="@+id/navGenerate"
-        android:checked="true"/>
+        android:title="Generate"
+        android:icon="@drawable/ic_runningicon"
+        />
 
-    <item android:title="Profile"
-        android:icon="@drawable/ic_person_black_24dp"
+    <item
         android:id="@+id/navProfile"
-        android:checked="false"/>
+        android:title="Profile"
+        android:icon="@drawable/ic_person_black_24dp"
+        />
 
 
 </menu>
