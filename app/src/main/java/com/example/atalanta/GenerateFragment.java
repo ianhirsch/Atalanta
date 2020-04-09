@@ -41,12 +41,15 @@ public class GenerateFragment extends Fragment {
 //                         transaction.commit();
 
                      case R.id.navGenerate:
+                         Intent intent_generate= new Intent(getActivity(), GenerateDestination.class);
+                         startActivity(intent_generate);
+                         return true;
 //                         selectedFragment = ItemtwoFragment.newInstance();
 //                         transaction = getSupportFragmentManager().beginTransaction();
 //                         transaction.replace(R.id.content,selectedFragment);
 //                         transaction.addToBackStack(null);
 //                         transaction.commit();
-                         return true;
+
                      case R.id.navProfile:
                          Intent intent = new Intent(getActivity(), LoginActivity.class);
                          startActivity(intent);
