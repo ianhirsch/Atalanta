@@ -20,7 +20,6 @@
         <activity android:name=".HealthActivity" />
         <activity android:name=".GenerateDistance" />
         <activity android:name=".GenerateDestination" />
-        <activity android:name=".GoogleFitFragment"/>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
