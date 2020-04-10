@@ -48,7 +48,7 @@ public class GenerateDestination extends AppCompatActivity {
         }
 
         // Create a new Places client instance.
-        PlacesClient placesClient = Places.createClient(this);
+        //PlacesClient placesClient = Places.createClient(this);
 
         // Initialize the AutocompleteSupportFragment.
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
