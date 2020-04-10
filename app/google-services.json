@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "594073505343",
+    "firebase_url": "https://atalanta-54100.firebaseio.com",
+    "project_id": "atalanta-54100",
+    "storage_bucket": "atalanta-54100.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:594073505343:android:861f2298e222393e68b28a",
+        "android_client_info": {
+          "package_name": "com.example.atalanta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "594073505343-louo5r57jcpkh3jvti5esm76ki54fjh6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDn7KuippTXG0zYwVwXw4qMhrwVibVGxvI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "594073505343-louo5r57jcpkh3jvti5esm76ki54fjh6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
