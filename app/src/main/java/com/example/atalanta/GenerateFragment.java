@@ -51,7 +51,7 @@ public class GenerateFragment extends Fragment {
 //                         transaction.commit();
 
                      case R.id.navProfile:
-                         Intent intent = new Intent(getActivity(), LoginActivity.class);
+                         Intent intent = new Intent(getActivity(), FirebaseUIActivity.class);
                          startActivity(intent);
                          return true;
                  }

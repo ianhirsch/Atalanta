@@ -62,11 +62,6 @@ public class MainActivity extends FragmentActivity {
             }
         });
         */
-
-        // Display welcome message w/ SharedPreference TODO
-        SharedPreferences sharedPreferences = getSharedPreferences("com.example.atalanta", Context.MODE_PRIVATE);
-        Boolean lgi = sharedPreferences.getBoolean("loggedIn",false);
-        Toast.makeText(getApplicationContext(),"Welcome! Logged In Status: " + lgi,Toast.LENGTH_SHORT).show();
     }
 
     /**
