@@ -17,9 +17,14 @@
         <activity android:name=".FirebaseUIActivity"></activity>
         <activity android:name=".SignupActivity" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".HealthActivity" />
+        <activity android:name=".HealthActivity"
+            android:screenOrientation="portrait"/>
         <activity android:name=".GenerateDistance" />
         <activity android:name=".GenerateDestination" />
+        <activity android:name=".SpotifyFragment"/>
+        <activity
+            android:name="com.spotify.sdk.android.authentication.LoginActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
