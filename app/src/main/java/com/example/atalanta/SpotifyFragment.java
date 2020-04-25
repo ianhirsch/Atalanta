@@ -39,9 +39,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class SpotifyFragment extends AppCompatActivity {
 
     private static final String CLIENT_ID = "94dcadb5863349829ae406bae1fff241";
-   // private static  final int REQUEST_CODE = 1337;
     private static final String REDIRECT_URI = "com.example.atalanta://callback";
-    //private String accessToken = "";
     private SpotifyAppRemote mSpotifyAppRemote;
 
 

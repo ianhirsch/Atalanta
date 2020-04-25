@@ -60,6 +60,9 @@ import java.math.RoundingMode;
  */
 public class HealthActivity extends AppCompatActivity {
 
+    private static final String CLIENT_ID = "94dcadb5863349829ae406bae1fff241";
+    private static final String REDIRECT_URI = "com.example.atalanta://callback";
+    private SpotifyAppRemote mSpotifyAppRemote;
     public static final String TAG = "StepCounter";
     private static final int REQUEST_OAUTH_REQUEST_CODE = 0x1001;
 
@@ -88,6 +91,65 @@ public class HealthActivity extends AppCompatActivity {
             subscribe();
             readData();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        ConnectionParams connectionParams =
+                new ConnectionParams.Builder(CLIENT_ID)
+                        .setRedirectUri(REDIRECT_URI)
+                        .showAuthView(true)
+                        .build();
+
+        SpotifyAppRemote.connect(this, connectionParams,
+                new Connector.ConnectionListener() {
+
+                    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
+                        mSpotifyAppRemote = spotifyAppRemote;
+                        android.util.Log.d("MainActivity", "Connected! Yay!");
+
+                        // Now you can start interacting with App Remote
+                        connected();
+
+                    }
+
+                    public void onFailure(Throwable throwable) {
+                        android.util.Log.e("MyActivity", throwable.getMessage(), throwable);
+
+                        // Something went wrong when attempting to connect! Handle errors here
+                    }
+                });
+    }
+
+    private void connected() {
+
+        String html = "<iframe src=\"https://open.spotify.com/embed/playlist/37i9dQZF1DX8jnAPF7Iiqp\" width=\"300\" height=\"80\" frameborder=\"0\" allowtransparency=\"true\" allow=\"encrypted-media\"></iframe>";
+        WebView wv = findViewById(R.id.webViewFast);
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.loadData(html, "text/html", null);
+
+        html = "<iframe src=\"https://open.spotify.com/embed/playlist/37i9dQZF1DXadOVCgGhS7j\" width=\"300\" height=\"80\" frameborder=\"0\" allowtransparency=\"true\" allow=\"encrypted-media\"></iframe>";
+        wv = findViewById(R.id.webViewSlow);
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.loadData(html, "text/html", null);
+
+
+        // Play a playlist
+        //mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:6bjKFnBgg2qLmRSwJbEKTC");
+
+        mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:37i9dQZF1DX8jnAPF7Iiqp");
+
+        // Subscribe to PlayerState
+        mSpotifyAppRemote.getPlayerApi()
+                .subscribeToPlayerState()
+                .setEventCallback(playerState -> {
+                    final Track track = playerState.track;
+                    if (track != null) {
+                        android.util.Log.d("MainActivity", track.name + " by " + track.artist.name);
+                    }
+                });
     }
 
     @Override
