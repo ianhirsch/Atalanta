@@ -14,8 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ProfileActivity"></activity>
-        <activity android:name=".FirebaseUIActivity" />
+        <activity android:name=".ProfileActivity"/>
         <activity android:name=".HealthActivity" />
         <activity android:name=".GenerateDistance" />
         <activity android:name=".GenerateDestination" />
