@@ -20,16 +20,28 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class FirebaseUIActivity extends AppCompatActivity {
+public class FirebaseUIActivity extends AppCompatActivity{
 
     private static final int RC_SIGN_IN = 123;
-
+    private FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase_ui);
+        // createSignInIntent();
+        // Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
         createSignInIntent();
     }
+
+    // When initializing your Activity, check to see if the user is currently signed in.
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        // Check if user is signed in (non-null) and update UI accordingly.
+//        FirebaseUser currentUser = mAuth.getCurrentUser();
+//        updateUI(currentUser);
+//    }
 
     public void createSignInIntent() {
         // [START auth_fui_create_intent]
@@ -55,14 +67,13 @@ public class FirebaseUIActivity extends AppCompatActivity {
 
         if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
-
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
                 Toast.makeText(getApplicationContext(),"Welcome! Logged In Status: " + user.getDisplayName(),Toast.LENGTH_SHORT).show();
                 Intent intent_generate= new Intent(this, MainActivity.class);
                 startActivity(intent_generate);
-
                 // ...
             } else {
                 // Sign in failed. If response is null the user canceled the
