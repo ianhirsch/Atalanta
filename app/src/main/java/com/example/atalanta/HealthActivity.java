@@ -96,7 +96,10 @@ public class HealthActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        signInSpotify();
+    }
 
+    public void signInSpotify(){
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(CLIENT_ID)
                         .setRedirectUri(REDIRECT_URI)
@@ -275,6 +278,7 @@ public class HealthActivity extends AppCompatActivity {
     private void signOut() {
         Context context = getApplicationContext();
         Fitness.getConfigClient(context, GoogleSignIn.getLastSignedInAccount(context)).disableFit();
+        mSpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
 
     /**
