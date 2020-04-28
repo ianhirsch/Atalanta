@@ -5,17 +5,23 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
-import android.app.Fragment;
+import android.widget.Scroller;
+import android.widget.Spinner;
 
 
 import com.android.volley.Request;
@@ -53,7 +59,7 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
     private final int[] colors = {Color.RED,Color.BLUE,Color.DKGRAY};
     private LatLng mLastKnownLatLng = new LatLng(37.4220, -122.0841); // subject to update
     private UiSettings mUiSettings;
-
+    private static String PREF_NAME = "com.example.atalanta";
 
     // VARIABLES FOR TESTING
     private final LatLng googlePlex = new LatLng(37.4220, -122.0841); // google plex
@@ -71,6 +77,7 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
 
         // load bottom nav bar
         loadFragment(new GenerateFragment());
+        //Log.d("MILEAGE", getMileage(getApplicationContext()).toString());
 
         //Test button for accessing login page, navbar onclick implemented
         test_button = (Button) findViewById(R.id.test_button);
@@ -203,6 +210,7 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
 
         return final_url;
     }
+
     private void loadFragment(Fragment fragment) {
         // create a FragmentManager
         FragmentManager fm = getFragmentManager();
@@ -211,6 +219,14 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         // replace the FrameLayout with new Fragment
         fragmentTransaction.replace(R.id.frameLayout, fragment);
         fragmentTransaction.commit(); // save the changes
+    }
+
+    private static SharedPreferences getPrefs(Context context) {
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+    }
+
+    public static Integer getMileage(Context context) {
+        return getPrefs(context).getInt("mileage", 0);
     }
 
 

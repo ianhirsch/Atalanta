@@ -3,17 +3,58 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="com.example.atalanta.MainActivity">
+    tools:context="com.example.atalanta.GenerateFragment">
+
+    <Button
+        android:id="@+id/navHealth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_alignParentBottom="true"
+        android:drawableTop="@drawable/ic_health"
+        android:background="@color/quantum_googred"
+        android:text="Health"
+        android:textSize="24sp"/>
 
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/navBar"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/navProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/navHealth"
+        android:layout_toRightOf="@+id/navHealth"
+        android:drawableTop="@drawable/ic_person_black_24dp"
+        android:background="@color/quantum_indigo100"
+        android:text="Profile"
+        android:textSize="24sp"/>
+
+    <Spinner
+        android:id="@+id/milesNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="0dp"
+        android:layout_toEndOf="@+id/navProfile"
+        android:layout_toRightOf="@+id/navProfile"
+        android:background="@color/quantum_white_100"/>
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#FFFFFF"
-        app:itemTextColor="@drawable/nav_item_color"
-        app:itemIconTint="@drawable/nav_item_color"
-        app:menu="@menu/nav_menu" />
+        android:layout_marginBottom="40dp"
+        android:paddingBottom="10dp"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/quantum_black_100"
+        android:layout_toEndOf="@+id/navProfile"
+        android:layout_toRightOf="@+id/navProfile"
+        android:background="@color/quantum_white_100"
+        android:text="Miles:" />
+
 
 </RelativeLayout>
