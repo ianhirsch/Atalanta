@@ -6,11 +6,9 @@ package com.example.atalanta;
  * author: Ting-Hung Lin
  */
 
-import android.util.Log;
-import android.util.Pair;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.JsonObject;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,29 +20,49 @@ import java.util.List;
 public class DirectionsJSONParser {
 
     /** Receives a JSONObject and returns a list of lists containing LatLng */
-    public ArrayList<List<LatLng>> parse(JSONObject jObject){
-        ArrayList<List<LatLng>> routes = new ArrayList<>();
+    public List<List<List<LatLng>>> parse(JSONObject jObject){
+        List wrapper = new ArrayList();
+
+        List<Double> dist = new ArrayList<>();
+        List<List<LatLng>> routes = new ArrayList<>();
+
+        List helper;
         try {
-            routes.add(helperFunc(jObject)); // First Route is the rootRoute
+            helper = helperFunc(jObject);
+            dist.add((Double)helper.get(0));
+            routes.add((List<LatLng>)helper.get(1)); // First Route is the rootRoute
 
             JSONArray alterRoutes = jObject.getJSONObject("route").getJSONArray("alternateRoutes");
-
             for(int i=0;i<alterRoutes.length();i++) {
                 JSONObject alterRoute = alterRoutes.getJSONObject(i);
-                routes.add(helperFunc(alterRoute)); // grow the list of routes
+                helper = helperFunc(alterRoute);
+                dist.add((Double)helper.get(0));
+                routes.add((List<LatLng>)helper.get(1)); // grow the list with alternative routes
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }catch (Exception e){
         }
-        return routes;
+        wrapper.add(dist);
+        wrapper.add(routes);
+        return wrapper;
     }
-    private List<LatLng> helperFunc(JSONObject jObject)
+
+    /**
+     *
+     * @param jObject
+     * @return
+     * first object in list is distance
+     * second object in list is the List<LatLng>
+     */
+    private List helperFunc(JSONObject jObject)
     {
+        List wrapper = new ArrayList();
         List<LatLng> path = new ArrayList<>(); // first two element for bounding box; path list doesn't include destination latlng
         try {
             JSONObject rootRoute = jObject.getJSONObject("route");
             Double distance = rootRoute.getDouble("distance");
+            wrapper.add(distance);
             JSONObject boundingBox = rootRoute.getJSONObject("boundingBox");
             Double SELng = boundingBox.getJSONObject("lr").getDouble("lng");
             Double SELat = boundingBox.getJSONObject("lr").getDouble("lat");
@@ -68,10 +86,11 @@ public class DirectionsJSONParser {
                     path.add(latLng);
                 }
             }
+            wrapper.add(path);
         }catch (JSONException e) {
             e.printStackTrace();
         }catch (Exception e){
         }
-        return path;
+        return wrapper;
     }
 }

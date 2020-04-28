@@ -41,7 +41,7 @@ public class GenerateFragment extends Fragment {
 //                         transaction.commit();
 
                      case R.id.navGenerate:
-                         Intent intent_generate= new Intent(getActivity(), GenerateDistance.class);
+                         Intent intent_generate= new Intent(getActivity(), GenerateActivity.class);
                          startActivity(intent_generate);
                          return true;
 //                         selectedFragment = ItemtwoFragment.newInstance();

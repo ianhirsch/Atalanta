@@ -242,5 +242,6 @@ public class ProfileActivity extends Activity implements
             sendEmailVerification();
         }
     }
+
 }
 

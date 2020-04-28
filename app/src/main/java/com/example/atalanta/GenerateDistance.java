@@ -22,8 +22,8 @@ public class GenerateDistance extends AppCompatActivity {
     }
 
     public void switchToDestination(View view) {
-        Intent intent = new Intent(this, GenerateDestination.class);
-        startActivity(intent);
+
+
     }
 
     public void generateDistance(View view) {

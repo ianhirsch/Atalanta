@@ -9,7 +9,6 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,11 +27,13 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONObject;
@@ -40,20 +41,23 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.ListIterator;
-import java.util.Random;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements  OnMapReadyCallback{
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 12;
     private RequestQueue requestQueue;
     private String url = "https://www.mapquestapi.com/directions/v2/alternateroutes";
     private static final String TAG = "ApiRequest";
-    private final LatLng mDestinationLatLng = new LatLng(37.3349, -122.0091); // apple park
-    private final LatLng googlplex = new LatLng(37.4220, -122.0841); // google plex
     private final int[] colors = {Color.RED,Color.BLUE,Color.DKGRAY};
+    private LatLng mLastKnownLatLng = new LatLng(37.4220, -122.0841); // subject to update
+    private UiSettings mUiSettings;
+
+
+    // VARIABLES FOR TESTING
+    private final LatLng googlePlex = new LatLng(37.4220, -122.0841); // google plex
+    private final LatLng applePark  = new LatLng(37.3349, -122.0091); // apple park
     Button test_button;
 
     @Override
@@ -63,31 +67,48 @@ public class MainActivity extends FragmentActivity {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // Display google maps in fragment
-        mapFragment.getMapAsync(googleMap -> {
-            mMap = googleMap;
-            displayMyLocation(); // called in getMapAsync since want map ready then display current marker
-        });
+        mapFragment.getMapAsync(this);
+
+        // load bottom nav bar
         loadFragment(new GenerateFragment());
 
-        // Test button for accessing login page, navbar onclick implemented
+        //Test button for accessing login page, navbar onclick implemented
         test_button = (Button) findViewById(R.id.test_button);
         test_button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
-                mMap.addMarker(new MarkerOptions().position(mDestinationLatLng));
-                sendAndRequestResponse(mDestinationLatLng);
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(applePark));
+                sendAndRequestResponse(applePark);
             }
         });
+    }
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        // map settings
+        mUiSettings = mMap.getUiSettings();
+        mUiSettings.setCompassEnabled(true);
+        mUiSettings.setZoomControlsEnabled(true);
+        mUiSettings.setMyLocationButtonEnabled(true);
+        mUiSettings.setAllGesturesEnabled(true);
+        mUiSettings.setMapToolbarEnabled(true);
+        displayMyLocation(); // called in getMapAsync since want map ready then display current marker
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                // start clean
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(mLastKnownLatLng));
 
+                // Add new marker to the Google Map Android API V2
+                mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
 
+                // Get those dank routes
+                sendAndRequestResponse(latLng);
+            }
+        });
     }
 
-    /**
-     * Handles the result of the request for location permissions
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
-     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[]grantResults)
     {
@@ -98,6 +119,7 @@ public class MainActivity extends FragmentActivity {
                 displayMyLocation();
         }
     }
+
     private void displayMyLocation() {
         // Check if permission granted
         int permission = ActivityCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION);
@@ -114,7 +136,7 @@ public class MainActivity extends FragmentActivity {
                 Location mLastKnownLocation = task.getResult();
                 if(task.isSuccessful() && mLastKnownLocation != null)
                 {
-                    LatLng mLastKnownLatLng = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
+                    mLastKnownLatLng = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
                     // move camera
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(mLastKnownLatLng));
                     mMap.moveCamera(CameraUpdateFactory.zoomTo(10));
@@ -144,33 +166,15 @@ public class MainActivity extends FragmentActivity {
                 {
                     LatLng mLastKnownLatLng = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
                     // Action
-                    //RequestQueue initialized
+                    // RequestQueue initialized
                     requestQueue = Volley.newRequestQueue(this);
                     JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                             (Request.Method.GET, getDirectionsUrl(mLastKnownLatLng,dest), null, new Response.Listener<JSONObject>() {
                                 // use googleplex as backup origin
                                 @Override
                                 public void onResponse(JSONObject response) {
-                                    DirectionsJSONParser parser = new DirectionsJSONParser();
-                                    // response is json
-                                    List<List<LatLng>> routes = parser.parse(response);
-                                    Random rnd = new Random(1);
-                                    for (int i = 0; i< routes.size(); i++){
-                                        List<LatLng> route = routes.get(i);
-                                        // use the first route's bounds to set map box
-                                        if(i == 0){
-                                            // move camera and bounding box so account for nav bar at bottom
-                                            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(
-                                                    new LatLngBounds(route.remove(0),route.remove(0)), 200));// second remove get's LatLng NEBound
-                                        }
-                                        else{
-                                            // don't care about bound box for other routes
-                                            route.remove(0);
-                                            route.remove(0);
-                                        }
-                                        // add polyLine with random color with the LatLng points received in routes
-                                        mMap.addPolyline(new PolylineOptions().clickable(true).color(colors[i]).addAll(route));
-                                    }
+                                    // Do the heavy duty of parsing json on async task
+                                    new parseDrawWorker().execute(response);
                                 }
                             }, error -> Log.d(TAG,"Error: "+ error.toString()));
                     requestQueue.add(jsonObjectRequest);
@@ -208,22 +212,40 @@ public class MainActivity extends FragmentActivity {
         fragmentTransaction.replace(R.id.frameLayout, fragment);
         fragmentTransaction.commit(); // save the changes
     }
-    private class drawRoute extends AsyncTask<List<LatLng>, Void, Void> {
-        @Override
-        protected Void doInBackground(List<LatLng> ... passing) {
-            List<LatLng> list = passing[0];
-            PolylineOptions polylineOptions = new PolylineOptions();
-            polylineOptions.clickable(true).color(Color.RED).addAll(list);
-            mMap.addPolyline(polylineOptions);
-            return null;
-        }
 
+
+    private class parseDrawWorker extends AsyncTask<JSONObject , Void, List<List<List<LatLng>>> > {
+        @Override
+        protected List<List<List<LatLng>>> doInBackground(JSONObject... jsonObjects) {
+            JSONObject response = jsonObjects[0];
+            DirectionsJSONParser parser = new DirectionsJSONParser();
+            return parser.parse(response);
+        }
         protected void onProgressUpdate(Integer... progress) {
 //            setProgressPercent(progress[0]);
         }
-
-        protected void onPostExecute(Long result) {
-//            showDialog("Downloaded " + result + " bytes");
+        protected void onPostExecute(List<List<List<LatLng>>> dataWrapper) {
+            // First field in wrapper is distances of each route
+            Log.i(TAG, "distance list " + dataWrapper.get(0).toString());
+            // Second field in wrapper is list of routes, each route contains a list of wayPoints
+            List<List<LatLng>> routes =  dataWrapper.get(1);
+            Random rnd = new Random(1);
+            for (int i = 0; i< routes.size(); i++){
+                List<LatLng> route = routes.get(i);
+                // use the first route's bounds to set map box
+                if(i == 0){
+                    // move camera and bounding box so account for nav bar at bottom
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(
+                            new LatLngBounds(route.remove(0),route.remove(0)), 200));// second remove get's LatLng NEBound
+                }
+                else{
+                    // don't care about bound box for other routes
+                    route.remove(0);
+                    route.remove(0);
+                }
+                // add polyLine with random color with the LatLng points received in routes
+                mMap.addPolyline(new PolylineOptions().clickable(true).color(colors[i]).addAll(route));
+            }
         }
     }
 }
