@@ -21,6 +21,57 @@
         android:layout_height="match_parent"
         android:layout_marginTop="10dp" />
 
+    <!-- Navigation Bar -->
+    <Button
+        android:id="@+id/navHealth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom"
+        android:padding="10dp"
+        android:layout_marginBottom="0dp"
+        android:drawableTop="@drawable/ic_health"
+        android:background="@color/quantum_googred"
+        android:text="Health"
+        android:textSize="24sp"/>
+
+    <Button
+        android:id="@+id/navProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom"
+        android:layout_marginStart="111dp"
+        android:layout_marginLeft="111dp"
+        android:padding="10dp"
+        android:layout_marginBottom="0dp"
+        android:drawableTop="@drawable/ic_person_black_24dp"
+        android:background="@color/quantum_indigo100"
+        android:text="Profile"
+        android:textSize="24sp"/>
+
+    <Spinner
+        android:id="@+id/milesNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom"
+        android:padding="12dp"
+        android:layout_marginBottom="0dp"
+        android:layout_marginStart="225dp"
+        android:layout_marginLeft="225dp"
+        android:background="@color/quantum_white_100"/>
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom"
+        android:layout_marginBottom="40dp"
+        android:paddingBottom="10dp"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/quantum_black_100"
+        android:layout_marginStart="225dp"
+        android:layout_marginLeft="225dp"
+        android:background="@color/quantum_white_100"
+        android:text="Miles:" />
 
 </fragment>
-

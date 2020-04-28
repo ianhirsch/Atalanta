@@ -5,22 +5,17 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Scroller;
 import android.widget.Spinner;
 
 
@@ -44,7 +39,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -59,12 +53,17 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
     private final int[] colors = {Color.RED,Color.BLUE,Color.DKGRAY};
     private LatLng mLastKnownLatLng = new LatLng(37.4220, -122.0841); // subject to update
     private UiSettings mUiSettings;
-    private static String PREF_NAME = "com.example.atalanta";
 
     // VARIABLES FOR TESTING
     private final LatLng googlePlex = new LatLng(37.4220, -122.0841); // google plex
     private final LatLng applePark  = new LatLng(37.3349, -122.0091); // apple park
     Button test_button;
+
+    //Variables for navigation bar
+    private Button health, profile;
+    private Spinner miles;
+    private Integer[] mileOptions;
+    private static Integer selectedMileage = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,9 +74,48 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
 
         mapFragment.getMapAsync(this);
 
-        // load bottom nav bar
-        loadFragment(new GenerateFragment());
-        //Log.d("MILEAGE", getMileage(getApplicationContext()).toString());
+        // Navigation bar with buttons and scroller on bottom of screen
+        //Get reference of button
+        health = (Button) findViewById(R.id.navHealth);
+        //Perform setOnClickListener on first button
+        health.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent_health = new Intent(getApplicationContext(), HealthActivity.class);
+                startActivity(intent_health);
+            }
+        });
+
+        profile = (Button) findViewById(R.id.navProfile);
+        profile.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        mileOptions = new Integer[20];
+        for(int i = 1; i <= 20; i++){
+            mileOptions[i-1] = i;
+        }
+        Spinner miles = (Spinner) findViewById(R.id.milesNum);
+        miles.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedMileage = Integer.parseInt(parent.getItemAtPosition(position).toString());
+                //Check that mileage variable is updated
+                Log.d("MILEAGE: ", selectedMileage.toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                selectedMileage = 1;
+            }
+        });
+
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(getApplicationContext(), android.R.layout.simple_spinner_item, mileOptions);
+        adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        miles.setAdapter(adapter);
 
         //Test button for accessing login page, navbar onclick implemented
         test_button = (Button) findViewById(R.id.test_button);
@@ -210,25 +248,6 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
 
         return final_url;
     }
-
-    private void loadFragment(Fragment fragment) {
-        // create a FragmentManager
-        FragmentManager fm = getFragmentManager();
-        // create a FragmentTransaction to begin the transaction and replace theFragment
-        FragmentTransaction fragmentTransaction = fm.beginTransaction();
-        // replace the FrameLayout with new Fragment
-        fragmentTransaction.replace(R.id.frameLayout, fragment);
-        fragmentTransaction.commit(); // save the changes
-    }
-
-    private static SharedPreferences getPrefs(Context context) {
-        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-    }
-
-    public static Integer getMileage(Context context) {
-        return getPrefs(context).getInt("mileage", 0);
-    }
-
 
     private class parseDrawWorker extends AsyncTask<JSONObject , Void, List<List<List<LatLng>>> > {
         @Override
