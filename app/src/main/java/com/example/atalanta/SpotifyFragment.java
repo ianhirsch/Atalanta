@@ -3,6 +3,7 @@ package com.example.atalanta;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -20,7 +21,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.JsonIOException;
+import com.google.gson.JsonParser;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
@@ -38,6 +41,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 
@@ -56,6 +60,12 @@ public class SpotifyFragment extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_health);
+        tokenExchange(new ResponseListener() {
+            @Override
+            public void onSuccess(String result) {
+                responseJson = result;
+            }
+        });
 
 //        AuthenticationRequest.Builder builder =
 //                new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
@@ -69,7 +79,7 @@ public class SpotifyFragment extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        tokenExchange();
+
 
 
 
@@ -189,7 +199,7 @@ public class SpotifyFragment extends AppCompatActivity {
                 // Response was successful and contains auth token
                 case TOKEN:
                     // Handle successful response
-                    tokenExchange();
+                    //tokenExchange();
                     break;
 
                 // Auth flow returned an error
@@ -206,7 +216,7 @@ public class SpotifyFragment extends AppCompatActivity {
 
 //    private void tokenExchange(String accessToken){
 
-    private void tokenExchange(){
+    private void tokenExchange(final ResponseListener responseListener){
     /* Start tep 2 of authentication */
 
         Thread t = new Thread() {
@@ -225,7 +235,7 @@ public class SpotifyFragment extends AppCompatActivity {
                                 try {
                                     JSONObject jsonObj = new JSONObject(response);
                                     String accessToken = jsonObj.getString("access_token");
-                                    startSong(accessToken);
+                                    startSong(responseListener, accessToken);
                                     requestQueue.stop();
                                 }catch (JSONException e){
 
@@ -262,7 +272,7 @@ public class SpotifyFragment extends AppCompatActivity {
         t.start();
     }
 
-    private void startSong(String code){
+    private void startSong(final ResponseListener responseListener, String code){
         Thread t = new Thread() {
             @Override
             @TargetApi(Build.VERSION_CODES.M)
@@ -277,9 +287,8 @@ public class SpotifyFragment extends AppCompatActivity {
                             @Override
                             public void onResponse(String response) {   //Server Response Handler
                                 //PostResponse.setText(response);
-                                    responseJson = response;
-                                Toast.makeText(SpotifyFragment.this, response, Toast.LENGTH_SHORT).show();
-                                    requestQueue.stop();
+                                responseListener.onSuccess(response);
+                                requestQueue.stop();
                             }
                         }, new Response.ErrorListener() {
                     @Override
