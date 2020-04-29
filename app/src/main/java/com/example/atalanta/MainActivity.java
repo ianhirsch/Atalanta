@@ -5,8 +5,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -14,8 +13,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.app.Fragment;
+import android.widget.Spinner;
 
 
 import com.android.volley.Request;
@@ -38,7 +39,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -54,11 +54,16 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
     private LatLng mLastKnownLatLng = new LatLng(37.4220, -122.0841); // subject to update
     private UiSettings mUiSettings;
 
-
     // VARIABLES FOR TESTING
     private final LatLng googlePlex = new LatLng(37.4220, -122.0841); // google plex
     private final LatLng applePark  = new LatLng(37.3349, -122.0091); // apple park
     Button test_button;
+
+    //Variables for navigation bar
+    private Button health, profile;
+    private Spinner miles;
+    private Integer[] mileOptions;
+    private static Integer selectedMileage = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +73,49 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         mapFragment.getMapAsync(this);
+
+        // Navigation bar with buttons and scroller on bottom of screen
+        //Get reference of button
+        health = (Button) findViewById(R.id.navHealth);
+        //Perform setOnClickListener on first button
+        health.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent_health = new Intent(getApplicationContext(), HealthActivity.class);
+                startActivity(intent_health);
+            }
+        });
+
+        profile = (Button) findViewById(R.id.navProfile);
+        profile.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        mileOptions = new Integer[20];
+        for(int i = 1; i <= 20; i++){
+            mileOptions[i-1] = i;
+        }
+        Spinner miles = (Spinner) findViewById(R.id.milesNum);
+        miles.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedMileage = Integer.parseInt(parent.getItemAtPosition(position).toString());
+                //Check that mileage variable is updated
+                Log.d("MILEAGE: ", selectedMileage.toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                selectedMileage = 1;
+            }
+        });
+
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(getApplicationContext(), android.R.layout.simple_spinner_item, mileOptions);
+        adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        miles.setAdapter(adapter);
 
         //Test button for accessing login page, navbar onclick implemented
         test_button = (Button) findViewById(R.id.test_button);
@@ -193,7 +241,7 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         // maxRoute set to 3
         String str_max = "maxRoutes=" + "3";
         // Building the parameters to the web service
-        String parameters = str_key + "&" + str_origin + "&" + str_dest + "&" + str_type + "&" + str_max;
+        String parameters = str_key + "&"+ str_origin + "&" + str_dest + "&" + str_type + "&" + str_max;
 
         // Building the url to the web service
         String final_url = url + "?" + parameters;
