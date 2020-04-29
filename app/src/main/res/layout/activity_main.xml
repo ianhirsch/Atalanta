@@ -66,14 +66,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="start|bottom"
         android:layout_marginBottom="40dp"
-        android:paddingBottom="12dp"
+        android:paddingVertical="5dp"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingHorizontal="3dp"
+        android:paddingHorizontal="16dp"
         android:textColor="@color/quantum_black_100"
         android:layout_marginStart="225dp"
         android:layout_marginLeft="225dp"
         android:background="@color/quantum_white_100"
-        android:text="Miles" />
+        android:text="MODE" />
 
 </fragment>

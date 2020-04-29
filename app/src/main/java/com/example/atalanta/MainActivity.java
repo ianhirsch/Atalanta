@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 
 import com.android.volley.Request;
@@ -42,6 +43,8 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.Random;
 
+import static java.lang.Math.cos;
+
 
 public class MainActivity extends FragmentActivity implements  OnMapReadyCallback{
     private GoogleMap mMap;
@@ -50,7 +53,7 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
     private RequestQueue requestQueue;
     private String url = "https://www.mapquestapi.com/directions/v2/alternateroutes";
     private static final String TAG = "ApiRequest";
-    private final int[] colors = {Color.RED,Color.BLUE,Color.DKGRAY};
+    private final int[] colors = {Color.BLUE,Color.RED,Color.DKGRAY};
     private LatLng mLastKnownLatLng = new LatLng(37.4220, -122.0841); // subject to update
     private UiSettings mUiSettings;
 
@@ -62,9 +65,9 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
 
     //Variables for navigation bar
     private Button health, profile;
-    private Spinner miles;
-    private Integer[] mileOptions;
-    private static Integer selectedMileage = 30;
+    private String[] mileOptions;
+    private static String selectedMileage = "30";
+    public Boolean moveCam = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,28 +97,36 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
                 startActivity(intent);
             }
         });
-
-        mileOptions = new Integer[21];
-        for(int i = 0; i <= 20; i++){
-            mileOptions[i] = i;
+        mileOptions = new String[6];
+        mileOptions[0] = "Dest ";
+        for(int i = 3; i <= 15; i=i+3){
+            mileOptions[i/3] = "   ".concat(String.valueOf(i)).concat("   ") ;
         }
         Spinner miles = (Spinner) findViewById(R.id.milesNum);
         miles.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedMileage = Integer.parseInt(parent.getItemAtPosition(position).toString());
+                selectedMileage = parent.getItemAtPosition(position).toString();
                 //Check that mileage variable is updated
-                Log.d("MILEAGE: ", selectedMileage.toString());
-                sendAndRequestResponse(facebook);
-            }
+                Log.d("MILEAGE: ", selectedMileage);
 
+                // only generate route if not chosen dest in miles box
+                if(!selectedMileage.trim().toLowerCase().equals("dest"))
+                {
+                    mMap.clear();
+                    moveCam = false;
+                    Random rand = new Random();
+                    // CAN CHECK ROUTE DISTANCE IN LOG "distance list" from asyn worker
+                    randomRouteGenerator(Double.valueOf(selectedMileage),rand);
+                }
+            }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 Log.d("MILEAGES: ", "spinner disappeared");
             }
         });
 
-        ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(getApplicationContext(), android.R.layout.simple_spinner_item, mileOptions);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, mileOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         miles.setAdapter(adapter);
 
@@ -124,8 +135,9 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         test_button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
                 mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(applePark));
-                sendAndRequestResponse(applePark);
+//                mMap.addMarker(new MarkerOptions().position(applePark));
+//                sendAndRequestResponse(applePark,"1");
+                displayMyLocation();
             }
         });
     }
@@ -143,22 +155,28 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                // start clean
-                mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(mLastKnownLatLng));
 
-                // Add new marker to the Google Map Android API V2
-                mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-
-                // Get those dank routes
-                sendAndRequestResponse(latLng);
+                // Get those dank routes only if spinner is selected at "Dest"
+                if (selectedMileage.trim().toLowerCase().equals("dest"))
+                {
+                    // start clean
+                    mMap.clear();
+                    mMap.addMarker(new MarkerOptions().position(mLastKnownLatLng).icon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                    // moveCam true so the asyn worker can set the map camera
+                    moveCam = true;
+                    // Add new marker to the Google Map Android API V2
+                    mMap.addMarker(new MarkerOptions().position(latLng));
+                    sendAndRequestResponse(latLng, "3");
+                }
+                else {
+                    Toast.makeText(getApplicationContext(),"To set destination? Change MODE",Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[]grantResults)
-    {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[]grantResults) {
         if(requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
         {
             // if request is cancelled, result arrays are empty
@@ -167,6 +185,64 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         }
     }
 
+    /**
+     *
+     * @param distance distance desired acquired from MODE spinner
+     * @param rand  A random number generator, no need to waste to generate another every call
+     */
+    private void randomRouteGenerator(Double distance, Random rand) {
+        // bounding box mechanism, approx circular reach as box, lat doesn't change over 10 mile so can use cos of center lat
+        Double df = distance/2/69;  // North-south distance in degrees
+        Double dl = df / cos(mLastKnownLatLng.latitude); // East-west distance in degrees
+        Double sLat = mLastKnownLatLng.latitude - df;
+        Double nLat = mLastKnownLatLng.latitude + df;
+        Double wLng = mLastKnownLatLng.longitude - dl;
+        Double eLng = mLastKnownLatLng.longitude + dl;
+
+        LatLng destination = mLastKnownLatLng;
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(mLastKnownLatLng).icon(BitmapDescriptorFactory
+                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+
+
+        // randomly generate 3 different destinations on box, change for more routes
+        for(int i = 0; i<3; i++)
+        {
+            /*
+             side = 0: west side of box, lng use wLng
+             side = 1: south side of box, lat use sLat
+             side = 2: east side of box, lng use eLng
+             side = 3: north side of box, lat use nLat
+            */
+            int side = rand.nextInt(4);
+            switch (side){
+                case 0:
+                    destination = new LatLng(2*df*rand.nextDouble()+sLat,wLng);
+                    break;
+                case 1:
+                    destination = new LatLng(sLat, 2*dl*rand.nextDouble()+wLng);
+                    break;
+                case 2:
+                    destination = new LatLng(2*df*rand.nextDouble()+sLat,eLng);
+                    break;
+                case 3:
+                    destination = new LatLng(nLat, 2*dl*rand.nextDouble()+wLng);
+                    break;
+            }
+            mMap.addMarker(new MarkerOptions().position(destination).icon(BitmapDescriptorFactory
+                    .defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            sendAndRequestResponse(destination,"1");
+        }
+        // move camera to fit all generated routes
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(
+                new LatLngBounds(new LatLng(sLat,wLng),new LatLng(nLat,eLng)), 280));// southwest and northeast to determine bounds, 200 padding
+
+    }
+
+
+    /**
+     * Function to place HUE_AZURE marker at current location, moves camera
+     */
     private void displayMyLocation() {
         // Check if permission granted
         int permission = ActivityCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION);
@@ -186,16 +262,21 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
                     mLastKnownLatLng = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
                     // move camera
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(mLastKnownLatLng));
-                    mMap.moveCamera(CameraUpdateFactory.zoomTo(10));
+                    mMap.moveCamera(CameraUpdateFactory.zoomTo(13));
                     // add current position marker
-                    mMap.addMarker(new MarkerOptions().position(mLastKnownLatLng));
+                    mMap.addMarker(new MarkerOptions().position(mLastKnownLatLng).icon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 }
             });
         }
     }
 
-    // function to get route direction
-    private void sendAndRequestResponse(LatLng dest) {
+    /**
+     * Top level function to get route from calling MapQuest API, checks for current location first
+     * @param dest destination of route
+     * @param max max routes to generate for given destination
+     */
+    private void sendAndRequestResponse(LatLng dest, String max) {
         // Check if permission granted
         int permission = ActivityCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION);
         // if not, ask for permission
@@ -216,7 +297,7 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
                     // RequestQueue initialized
                     requestQueue = Volley.newRequestQueue(this);
                     JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                            (Request.Method.GET, getDirectionsUrl(mLastKnownLatLng,dest), null, new Response.Listener<JSONObject>() {
+                            (Request.Method.GET, getDirectionsUrl(mLastKnownLatLng,dest, max), null, new Response.Listener<JSONObject>() {
                                 // use googleplex as backup origin
                                 @Override
                                 public void onResponse(JSONObject response) {
@@ -230,8 +311,16 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         }
 
     }
-    // helper function for constructing the API query
-    private String getDirectionsUrl(LatLng origin, LatLng dest) {
+
+
+    /**
+     *Helper function for constructing the API query
+     * @param origin origin of route, always current location in current setting
+     * @param dest  destination of route
+     * @param max max routes to generate with origin, destination pair, passed from sendAndRequestResponse()
+     * @return html query string
+     */
+    private String getDirectionsUrl(LatLng origin, LatLng dest, String max) {
         // API Key
         String str_key = "key=" + getString(R.string.direction_api_key);
         // Origin of route
@@ -241,7 +330,7 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         // routeType
         String str_type = "routeType=" + "pedestrian";
         // maxRoute set to 3
-        String str_max = "maxRoutes=" + "3";
+        String str_max = "maxRoutes=" + max;
         // Building the parameters to the web service
         String parameters = str_key + "&" + str_origin + "&" + str_dest + "&" + str_type + "&" + str_max;
 
@@ -251,6 +340,18 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         return final_url;
     }
 
+    /**
+     * Async worker for handling and parsing API json response, see DirectionsJSONParser Class for more info
+     * After parsing, returned with data structure
+     *
+     * | { route1 distance, route2 distance, route3 distance }                                                                            |
+     * | { [ (route1)SWBounding LatLng, NEBounding LatLng, origin LatLng, firstWayPoint LatLng, ..... lastWayPointB4Destination LatLng]     |
+     * |   [ (route2)SWBounding LatLng, NEBounding LatLng, origin LatLng, firstWayPoint LatLng, ..... lastWayPointB4Destination LatLng]     |
+     * |   [ (route3)SWBounding LatLng, NEBounding LatLng, origin LatLng, firstWayPoint LatLng, ..... lastWayPointB4Destination LatLng] }   |
+     *
+     * OnPostExecute construct polyline using the wayPoints of each route,
+     * moves camera to be bounded with SWBounding LatLng, NEBounding LatLng of first route
+     */
     private class parseDrawWorker extends AsyncTask<JSONObject , Void, List<List<List<LatLng>>> > {
         @Override
         protected List<List<List<LatLng>>> doInBackground(JSONObject... jsonObjects) {
@@ -270,10 +371,10 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
             for (int i = 0; i< routes.size(); i++){
                 List<LatLng> route = routes.get(i);
                 // use the first route's bounds to set map box
-                if(i == 0){
+                if(i == 0 && moveCam){
                     // move camera and bounding box so account for nav bar at bottom
                     mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(
-                            new LatLngBounds(route.remove(0),route.remove(0)), 200));// second remove get's LatLng NEBound
+                            new LatLngBounds(route.remove(0),route.remove(0)), 280));// second remove get's LatLng NEBound
                 }
                 else{
                     // don't care about bound box for other routes
