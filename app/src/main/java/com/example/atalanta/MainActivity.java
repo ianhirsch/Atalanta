@@ -57,13 +57,14 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
     // VARIABLES FOR TESTING
     private final LatLng googlePlex = new LatLng(37.4220, -122.0841); // google plex
     private final LatLng applePark  = new LatLng(37.3349, -122.0091); // apple park
+    private final LatLng facebook  = new LatLng(37.4851, -122.1483); // facebook hq
     Button test_button;
 
     //Variables for navigation bar
     private Button health, profile;
     private Spinner miles;
     private Integer[] mileOptions;
-    private static Integer selectedMileage = 1;
+    private static Integer selectedMileage = 30;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,9 +95,9 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
             }
         });
 
-        mileOptions = new Integer[20];
-        for(int i = 1; i <= 20; i++){
-            mileOptions[i-1] = i;
+        mileOptions = new Integer[21];
+        for(int i = 0; i <= 20; i++){
+            mileOptions[i] = i;
         }
         Spinner miles = (Spinner) findViewById(R.id.milesNum);
         miles.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -105,11 +106,12 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
                 selectedMileage = Integer.parseInt(parent.getItemAtPosition(position).toString());
                 //Check that mileage variable is updated
                 Log.d("MILEAGE: ", selectedMileage.toString());
+                sendAndRequestResponse(facebook);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                selectedMileage = 1;
+                Log.d("MILEAGES: ", "spinner disappeared");
             }
         });
 
@@ -146,7 +148,7 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
                 mMap.addMarker(new MarkerOptions().position(mLastKnownLatLng));
 
                 // Add new marker to the Google Map Android API V2
-                mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
                 // Get those dank routes
                 sendAndRequestResponse(latLng);
@@ -241,7 +243,7 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         // maxRoute set to 3
         String str_max = "maxRoutes=" + "3";
         // Building the parameters to the web service
-        String parameters = str_key + "&"+ str_origin + "&" + str_dest + "&" + str_type + "&" + str_max;
+        String parameters = str_key + "&" + str_origin + "&" + str_dest + "&" + str_type + "&" + str_max;
 
         // Building the url to the web service
         String final_url = url + "?" + parameters;
