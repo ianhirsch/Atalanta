@@ -69,9 +69,6 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
 
         mapFragment.getMapAsync(this);
 
-        // load bottom nav bar
-        loadFragment(new GenerateFragment());
-
         //Test button for accessing login page, navbar onclick implemented
         test_button = (Button) findViewById(R.id.test_button);
         test_button.setOnClickListener(new View.OnClickListener(){
@@ -196,23 +193,13 @@ public class MainActivity extends FragmentActivity implements  OnMapReadyCallbac
         // maxRoute set to 3
         String str_max = "maxRoutes=" + "3";
         // Building the parameters to the web service
-        String parameters = str_key + "&"+ str_origin + "&" + str_dest + "&" + str_type + "&" + str_max;
+        String parameters = str_key + "&" + str_origin + "&" + str_dest + "&" + str_type + "&" + str_max;
 
         // Building the url to the web service
         String final_url = url + "?" + parameters;
 
         return final_url;
     }
-    private void loadFragment(Fragment fragment) {
-        // create a FragmentManager
-        FragmentManager fm = getFragmentManager();
-        // create a FragmentTransaction to begin the transaction and replace theFragment
-        FragmentTransaction fragmentTransaction = fm.beginTransaction();
-        // replace the FrameLayout with new Fragment
-        fragmentTransaction.replace(R.id.frameLayout, fragment);
-        fragmentTransaction.commit(); // save the changes
-    }
-
 
     private class parseDrawWorker extends AsyncTask<JSONObject , Void, List<List<List<LatLng>>> > {
         @Override
