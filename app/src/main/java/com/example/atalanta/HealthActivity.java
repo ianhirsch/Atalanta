@@ -1,41 +1,26 @@
-/*
- * Copyright (C) 2016 Google, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.example.atalanta;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.TextView;
-
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.example.atalanta.logger.Log;
-import com.example.atalanta.logger.LogView;
-import com.example.atalanta.logger.LogWrapper;
-import com.example.atalanta.logger.MessageOnlyLogFilter;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataSet;
@@ -49,15 +34,13 @@ import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.protocol.types.Track;
-
+import org.json.JSONException;
+import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * This sample demonstrates combining the Recording API and History API of the Google Fit platform
- * to record steps, and display the daily current step count. It also demonstrates how to
- * authenticate a user with Google Play Services.
- */
 public class HealthActivity extends AppCompatActivity {
 
     private static final String CLIENT_ID = "94dcadb5863349829ae406bae1fff241";
@@ -65,14 +48,42 @@ public class HealthActivity extends AppCompatActivity {
     private SpotifyAppRemote mSpotifyAppRemote;
     public static final String TAG = "StepCounter";
     private static final int REQUEST_OAUTH_REQUEST_CODE = 0x1001;
+    private String responseString = "";
+    private String accessToken = "";
+    private String[] slowSongs = new String[]{};
+    private String[] fastSongs = new String[]{};
+    private Boolean isPaused = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_health);
-        // This method sets up our custom logger, which will print all log messages to the device
-        // screen, as well as to adb logcat.
-        //initializeLogging();
+
+        getPlaylistInfo(new ResponseListener() {
+            @Override
+            public void onSuccess(String result, String speed) {
+                responseString = result;
+                System.out.print(responseString);
+                try {
+                    //String sci = result.substring(0,18);
+                    String sci = result.replace("\n","").replaceAll("\\s+","");
+                    System.out.print(sci);
+                    String temp = sci.replace("{\"track\":{\"id\":\"", "");
+
+                    String temp2 = temp.replace("\"}}", "");
+                    String[] temp3 = temp2.substring(10, temp2.length()-2).split(",");
+
+                    if (speed == "slow") {
+                        slowSongs = temp3.clone();
+                    } else if (speed == "fast") {
+                        fastSongs = temp3.clone();
+                    }
+
+                }catch (IndexOutOfBoundsException e){
+                    e.printStackTrace();
+                }
+            }
+        });
 
         FitnessOptions fitnessOptions =
                 FitnessOptions.builder()
@@ -91,6 +102,8 @@ public class HealthActivity extends AppCompatActivity {
             subscribe();
             readData();
         }
+
+        signInSpotify();
     }
 
     @Override
@@ -127,22 +140,11 @@ public class HealthActivity extends AppCompatActivity {
     }
 
     private void connected() {
-
-        String html = "<iframe src=\"https://open.spotify.com/embed/playlist/37i9dQZF1DX8jnAPF7Iiqp\" width=\"300\" height=\"80\" frameborder=\"0\" allowtransparency=\"true\" allow=\"encrypted-media\"></iframe>";
-        WebView wv = findViewById(R.id.webViewFast);
-        wv.getSettings().setJavaScriptEnabled(true);
-        wv.loadData(html, "text/html", null);
-
-        html = "<iframe src=\"https://open.spotify.com/embed/playlist/37i9dQZF1DXadOVCgGhS7j\" width=\"300\" height=\"80\" frameborder=\"0\" allowtransparency=\"true\" allow=\"encrypted-media\"></iframe>";
-        wv = findViewById(R.id.webViewSlow);
-        wv.getSettings().setJavaScriptEnabled(true);
-        wv.loadData(html, "text/html", null);
-
-
-        // Play a playlist
-        //mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:6bjKFnBgg2qLmRSwJbEKTC");
-
-        mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:37i9dQZF1DX8jnAPF7Iiqp");
+        int g = fastSongs.length;
+        String s = fastSongs[0];
+        String f = slowSongs[0];
+        mSpotifyAppRemote.getPlayerApi().play("spotify:track:" + s);
+        mSpotifyAppRemote.getPlayerApi().queue("spotify:track:" + f);
 
         // Subscribe to PlayerState
         mSpotifyAppRemote.getPlayerApi()
@@ -150,8 +152,11 @@ public class HealthActivity extends AppCompatActivity {
                 .setEventCallback(playerState -> {
                     final Track track = playerState.track;
                     if (track != null) {
-                        android.util.Log.d("MainActivity", track.name + " by " + track.artist.name);
+                        TextView tv = findViewById(R.id.songText);
+                        tv.setText( track.name + "\n by \n" + track.artist.name);
+                        tv.setTextSize(20);
                     }
+                    isPaused = playerState.isPaused;
                 });
     }
 
@@ -281,29 +286,149 @@ public class HealthActivity extends AppCompatActivity {
         mSpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
 
-    /**
-     * Initializes a custom log class that outputs both to in-app targets and logcat.
-     */
-//    private void initializeLogging() {
-//        // Wraps Android's native log framework.
-//        LogWrapper logWrapper = new LogWrapper();
-//        // Using Log, front-end to the logging chain, emulates android.util.log method signatures.
-//        Log.setLogNode(logWrapper);
-//        // Filter strips out everything except the message text.
-//        MessageOnlyLogFilter msgFilter = new MessageOnlyLogFilter();
-//        logWrapper.setNext(msgFilter);
-//        // On screen logging via a customized TextView.
-//        LogView logView = (LogView) findViewById(R.id.sample_logview);
-//
-//        // Fixing this lint error adds logic without benefit.
-//        // noinspection AndroidLintDeprecation
-//        //logView.setTextAppearance(R.style.Log);
-//
-//        logView.setBackgroundColor(Color.WHITE);
-//        msgFilter.setNext(logView);
-//        Log.i(TAG, "Ready");
-//    }
+    private void getPlaylistInfo(final ResponseListener responseListener){
+        Thread t = new Thread() {
+            @Override
+            @TargetApi(Build.VERSION_CODES.M)
+            public void run() {
+                final RequestQueue requestQueue = Volley.newRequestQueue(HealthActivity.this);
+                String server_urlpost = "https://accounts.spotify.com/api/token";
 
+                StringRequest stringRequestpost = new StringRequest(Request.Method.POST, server_urlpost,
 
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {   //Server Response Handler
+                                //PostResponse.setText(response);
+                                try {
+                                    JSONObject jsonObj = new JSONObject(response);
+                                    String accessToken = jsonObj.getString("access_token");
+                                    startSong(responseListener, accessToken);
+                                    requestQueue.stop();
+                                }catch (JSONException e){
 
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {    //On Error Response Handler
+                        //PostResponse.setText("Something went wrong...");
+                        error.printStackTrace();
+                        requestQueue.stop();
+                    }
+                }){
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String,String> params = new HashMap<String, String>();
+                        params.put("grant_type","client_credentials");
+
+                        //Log.i(TAG, params.toString());
+                        return params;
+                    }
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String,String> headers=new HashMap<String,String>();
+                        headers.put("Authorization", "Basic " + R.string.spotifyEncoded + "=");
+                        return headers;
+                    }
+                };
+
+                //Starts Request
+                requestQueue.add(stringRequestpost);
+            }
+        };
+        t.start();
+    }
+
+    private void startSong(final ResponseListener responseListener, String code){
+        Thread t = new Thread() {
+            @Override
+            @TargetApi(Build.VERSION_CODES.M)
+            public void run() {
+                final RequestQueue requestQueue = Volley.newRequestQueue(HealthActivity.this);
+                String playlist_idSlow = "37i9dQZF1DXc7KgLAqOCoC";
+                String server_urlpostSlow = "https://api.spotify.com/v1/playlists/37i9dQZF1DXc7KgLAqOCoC/tracks/?fields=items(track(id))";
+
+                StringRequest stringRequestpostSlow = new StringRequest(Request.Method.GET, server_urlpostSlow,
+
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {   //Server Response Handler
+                                //PostResponse.setText(response);
+                                responseListener.onSuccess(response, "slow");
+                                requestQueue.stop();
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {    //On Error Response Handler
+                        //PostResponse.setText("Something went wrong...");
+                        error.printStackTrace();
+                        requestQueue.stop();
+                    }
+                }){
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String,String> headers=new HashMap<String,String>();
+                        android.util.Log.d("token = ", accessToken);
+                        headers.put("Authorization", "Bearer " + code);
+                        return headers;
+                    }
+                };
+
+                String playlist_idFast = "spotify:playlist:37i9dQZF1DX8jnAPF7Iiqp";
+                String server_urlpostFast = "https://api.spotify.com/v1/playlists/37i9dQZF1DX8jnAPF7Iiqp/tracks/?fields=items(track(id))";
+
+                StringRequest stringRequestpostFast = new StringRequest(Request.Method.GET, server_urlpostFast,
+
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {   //Server Response Handler
+                                //PostResponse.setText(response);
+                                responseListener.onSuccess(response, "fast");
+                                requestQueue.stop();
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {    //On Error Response Handler
+                        //PostResponse.setText("Something went wrong...");
+                        error.printStackTrace();
+                        requestQueue.stop();
+                    }
+                }){
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String,String> headers=new HashMap<String,String>();
+                        android.util.Log.d("token = ", accessToken);
+                        headers.put("Authorization", "Bearer " + code);
+                        return headers;
+                    }
+                };
+
+                //Starts Request
+                requestQueue.add(stringRequestpostSlow);
+                requestQueue.add(stringRequestpostFast);
+
+            }
+        };
+        t.start();
+    }
+
+    public void backSong(View view){
+        mSpotifyAppRemote.getPlayerApi().skipPrevious();
+    }
+
+    public void playSong(View view){
+        // Subscribe to PlayerState
+       if (isPaused){
+           mSpotifyAppRemote.getPlayerApi().resume();
+           isPaused = false;
+       } else {
+           mSpotifyAppRemote.getPlayerApi().pause();
+           isPaused = true;
+       }
+    }
+
+    public void nextSong(View view){
+        mSpotifyAppRemote.getPlayerApi().skipNext();
+    }
 }

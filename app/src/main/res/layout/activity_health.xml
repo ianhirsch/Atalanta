@@ -56,7 +56,7 @@ limitations under the License.
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card"
-            android:layout_below="@id/cardWebView2"
+            android:layout_below="@id/cardWebView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp">
@@ -148,41 +148,94 @@ limitations under the License.
         android:layout_height="160dp"
         android:layout_margin="8dp"
         android:padding="16dp">
-    <WebView
-        android:id="@+id/webViewFast"
-        android:layout_width="342dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/backToMain"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="35dp"
-        android:layout_marginEnd="37dp"
-        android:layout_marginRight="37dp" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="20dp"
+                android:layout_marginTop="40dp"
+                android:layout_centerInParent="true"
+                android:textAlignment="center"
+                android:id="@+id/songText">
+            </TextView>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/relLay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="90dp">
+
+            <Button
+                android:id="@+id/backSong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginEnd="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_toStartOf="@+id/playSong"
+                android:layout_toLeftOf="@+id/playSong"
+                android:drawableLeft="@drawable/ic_keyboard_arrow_left_black_24dp"
+                android:onClick="backSong"></Button>
+
+            <Button
+                android:id="@+id/playSong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:drawableLeft="@drawable/ic_play_arrow_black_24dp"
+                android:onClick="playSong"></Button>
+
+            <Button
+                android:id="@+id/nextSong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginEnd="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_toEndOf="@+id/playSong"
+                android:layout_toRightOf="@+id/playSong"
+                android:drawableLeft="@drawable/ic_keyboard_arrow_right_black_24dp"
+                android:onClick="nextSong"></Button>
+
+        </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardWebView2"
-        android:layout_below="@id/cardWebView"
-        android:layout_width="match_parent"
-        android:layout_height="160dp"
-        android:layout_margin="8dp"
-        android:padding="16dp">
-    <WebView
-        android:id="@+id/webViewSlow"
-        android:layout_width="342dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/webViewFast"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="35dp"
-        android:layout_marginEnd="37dp"
-        android:layout_marginRight="37dp" />
-</com.google.android.material.card.MaterialCardView>
+<!--    <com.google.android.material.card.MaterialCardView-->
+<!--        android:id="@+id/cardWebView2"-->
+<!--        android:layout_below="@id/cardWebView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="160dp"-->
+<!--        android:layout_margin="8dp"-->
+<!--        android:padding="16dp">-->
+<!--    <WebView-->
+<!--        android:id="@+id/webViewSlow"-->
+<!--        android:layout_width="342dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_below="@+id/webViewFast"-->
+<!--        android:layout_alignParentStart="true"-->
+<!--        android:layout_alignParentLeft="true"-->
+<!--        android:layout_marginStart="16dp"-->
+<!--        android:layout_marginLeft="16dp"-->
+<!--        android:layout_marginTop="35dp"-->
+<!--        android:layout_marginEnd="37dp"-->
+<!--        android:layout_marginRight="37dp" />-->
+<!--</com.google.android.material.card.MaterialCardView>-->
 
 </RelativeLayout>
