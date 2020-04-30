@@ -8,10 +8,18 @@ import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -33,57 +41,86 @@ import com.google.android.gms.tasks.Task;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
+import com.spotify.protocol.client.CallResult;
+import com.spotify.protocol.client.Result;
+import com.spotify.protocol.client.Subscription;
+import com.spotify.protocol.types.Empty;
+import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 public class HealthActivity extends AppCompatActivity {
 
     private static final String CLIENT_ID = "94dcadb5863349829ae406bae1fff241";
     private static final String REDIRECT_URI = "com.example.atalanta://callback";
     private SpotifyAppRemote mSpotifyAppRemote;
-    public static final String TAG = "StepCounter";
     private static final int REQUEST_OAUTH_REQUEST_CODE = 0x1001;
-    private String responseString = "";
-    private String accessToken = "";
     private String[] slowSongs = new String[]{};
     private String[] fastSongs = new String[]{};
     private Boolean isPaused = false;
+    private PlayerState playerState = null;
+    private Boolean replayIgnore = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_health);
 
-        getPlaylistInfo(new ResponseListener() {
+        requestPlaylistInfo(new ResponseListener() {
+                @Override
+                public void onSuccess(String result, String speed) {
+                    try {
+                        //String sci = result.substring(0,18);
+                        String sci = result.replace("\n", "").replaceAll("\\s+", "");
+                        System.out.print(sci);
+                        String temp = sci.replace("{\"track\":{\"id\":\"", "");
+
+                        String temp2 = temp.replace("\"}}", "");
+                        String[] temp3 = temp2.substring(10, temp2.length() - 2).split(",");
+
+                        if (speed == "slow" && result != "") {
+                            slowSongs = temp3.clone();
+                        } else if (speed == "fast" && result != "") {
+                            fastSongs = temp3.clone();
+                        }
+
+                    } catch (IndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, true);
+
+        requestPlaylistInfo(new ResponseListener() {
             @Override
             public void onSuccess(String result, String speed) {
-                responseString = result;
-                System.out.print(responseString);
                 try {
                     //String sci = result.substring(0,18);
-                    String sci = result.replace("\n","").replaceAll("\\s+","");
+                    String sci = result.replace("\n", "").replaceAll("\\s+", "");
                     System.out.print(sci);
                     String temp = sci.replace("{\"track\":{\"id\":\"", "");
 
                     String temp2 = temp.replace("\"}}", "");
-                    String[] temp3 = temp2.substring(10, temp2.length()-2).split(",");
+                    String[] temp3 = temp2.substring(10, temp2.length() - 2).split(",");
 
-                    if (speed == "slow") {
-                        slowSongs = temp3.clone();
-                    } else if (speed == "fast") {
+                    if (speed == "fast" && result != "") {
                         fastSongs = temp3.clone();
                     }
 
-                }catch (IndexOutOfBoundsException e){
+                } catch (IndexOutOfBoundsException e) {
                     e.printStackTrace();
                 }
             }
-        });
+        }, false);
 
         FitnessOptions fitnessOptions =
                 FitnessOptions.builder()
@@ -102,14 +139,18 @@ public class HealthActivity extends AppCompatActivity {
             subscribe();
             readData();
         }
+        if (SpotifyAppRemote.isSpotifyInstalled(this)){
+            signInSpotify();
+        } else {
+            Toast.makeText(this, "Must have Spotify installed to listen to music.", Toast.LENGTH_SHORT).show();
+        }
+        }
 
-        signInSpotify();
-    }
 
     @Override
     protected void onStart() {
         super.onStart();
-        signInSpotify();
+
     }
 
     public void signInSpotify(){
@@ -124,10 +165,9 @@ public class HealthActivity extends AppCompatActivity {
 
                     public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                         mSpotifyAppRemote = spotifyAppRemote;
-                        android.util.Log.d("MainActivity", "Connected! Yay!");
-
-                        // Now you can start interacting with App Remote
+                        android.util.Log.d("HealthAcitivty", "Connected! Yay!");
                         connected();
+                        // Now you can start interacting with App Remote
 
                     }
 
@@ -140,11 +180,6 @@ public class HealthActivity extends AppCompatActivity {
     }
 
     private void connected() {
-        int g = fastSongs.length;
-        String s = fastSongs[0];
-        String f = slowSongs[0];
-        mSpotifyAppRemote.getPlayerApi().play("spotify:track:" + s);
-        mSpotifyAppRemote.getPlayerApi().queue("spotify:track:" + f);
 
         // Subscribe to PlayerState
         mSpotifyAppRemote.getPlayerApi()
@@ -153,11 +188,32 @@ public class HealthActivity extends AppCompatActivity {
                     final Track track = playerState.track;
                     if (track != null) {
                         TextView tv = findViewById(R.id.songText);
-                        tv.setText( track.name + "\n by \n" + track.artist.name);
+                        tv.setText(track.name + "\n by \n" + track.artist.name);
                         tv.setTextSize(20);
                     }
-                    isPaused = playerState.isPaused;
+                    this.playerState = playerState;
+
+                    TextView tv = findViewById(R.id.heartRateTextView);
+                    int currentHeartRate = Integer.valueOf(tv.getText().toString());
+                    EditText et = findViewById(R.id.targetHeartRateEditView);
+                    int targetHeartRate = Integer.valueOf(et.getText().toString());
+
+                    if(!replayIgnore) {
+                        if (currentHeartRate >= targetHeartRate) {
+                            mSpotifyAppRemote.getPlayerApi().play("spotify:track:" + fastSongs[(int) (Math.random() * ((fastSongs.length) + 1))]);
+                            Button b = findViewById(R.id.playSong);
+                            b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause_black_24dp, 0, 0, 0);
+                            replayIgnore = false;
+                        } else {
+                            mSpotifyAppRemote.getPlayerApi().play("spotify:track:" + slowSongs[(int) (Math.random() * ((slowSongs.length) + 1))]);
+                            Button b = findViewById(R.id.playSong);
+                            b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause_black_24dp, 0, 0, 0);
+                            replayIgnore = false;
+                        }
+                    }
+
                 });
+
     }
 
     @Override
@@ -183,9 +239,9 @@ public class HealthActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Log.i(TAG, "Successfully subscribed!");
+                                    Log.i("Google Fit Sign in", "Successfully subscribed!");
                                 } else {
-                                    Log.w(TAG, "There was a problem subscribing.", task.getException());
+                                    Log.w("Google Fit Sign in", "There was a problem subscribing Distance.", task.getException());
                                 }
                             }
                         });
@@ -196,9 +252,9 @@ public class HealthActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Log.i(TAG, "Successfully subscribed!");
+                                    Log.i("Google Fit Sign in", "Successfully subscribed!");
                                 } else {
-                                    Log.w(TAG, "There was a problem subscribing.", task.getException());
+                                    Log.w("Google Fit Sign in", "There was a problem subscribing Step Count.", task.getException());
                                 }
                             }
                         });
@@ -253,6 +309,7 @@ public class HealthActivity extends AppCompatActivity {
                                 tvStep.setText("There was a problem getting the step count.");
                             }
                         });
+
     }
 
     @Override
@@ -265,10 +322,7 @@ public class HealthActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.sign_out) {
-            signOut();
-            return true;
-        } else if (id == R.id.refreshData){
+        if (id == R.id.refreshData){
             readData();
             return true;
         }
@@ -280,13 +334,20 @@ public class HealthActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SpotifyAppRemote.disconnect(mSpotifyAppRemote);
+    }
+
+    //TODO: Move to profile page
     private void signOut() {
         Context context = getApplicationContext();
         Fitness.getConfigClient(context, GoogleSignIn.getLastSignedInAccount(context)).disableFit();
-        mSpotifyAppRemote.disconnect(mSpotifyAppRemote);
+        SpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
 
-    private void getPlaylistInfo(final ResponseListener responseListener){
+    private void requestPlaylistInfo(final ResponseListener responseListener, Boolean isSlow){
         Thread t = new Thread() {
             @Override
             @TargetApi(Build.VERSION_CODES.M)
@@ -303,7 +364,11 @@ public class HealthActivity extends AppCompatActivity {
                                 try {
                                     JSONObject jsonObj = new JSONObject(response);
                                     String accessToken = jsonObj.getString("access_token");
-                                    startSong(responseListener, accessToken);
+                                    if(isSlow){
+                                        getSlowPlaylistInfo(responseListener, accessToken);
+                                    } else {
+                                        getFastPlaylistInfo(responseListener, accessToken);
+                                    }
                                     requestQueue.stop();
                                 }catch (JSONException e){
 
@@ -328,7 +393,7 @@ public class HealthActivity extends AppCompatActivity {
                     @Override
                     public Map<String, String> getHeaders() throws AuthFailureError {
                         Map<String,String> headers=new HashMap<String,String>();
-                        headers.put("Authorization", "Basic " + R.string.spotifyEncoded + "=");
+                        headers.put("Authorization", "Basic " + "OTRkY2FkYjU4NjMzNDk4MjlhZTQwNmJhZTFmZmYyNDE6MDgxMDI0NmFiOGZhNDM0MTk4ZTBkNmMwYzg2MzAyZDc=" );
                         return headers;
                     }
                 };
@@ -340,7 +405,7 @@ public class HealthActivity extends AppCompatActivity {
         t.start();
     }
 
-    private void startSong(final ResponseListener responseListener, String code){
+    private void getSlowPlaylistInfo(final ResponseListener responseListener, String code){
         Thread t = new Thread() {
             @Override
             @TargetApi(Build.VERSION_CODES.M)
@@ -369,12 +434,26 @@ public class HealthActivity extends AppCompatActivity {
                     @Override
                     public Map<String, String> getHeaders() throws AuthFailureError {
                         Map<String,String> headers=new HashMap<String,String>();
-                        android.util.Log.d("token = ", accessToken);
+                        android.util.Log.d("token = ", code);
                         headers.put("Authorization", "Bearer " + code);
                         return headers;
                     }
                 };
 
+                //Starts Request
+                requestQueue.add(stringRequestpostSlow);
+
+            }
+        };
+        t.start();
+    }
+
+    private void getFastPlaylistInfo(final ResponseListener responseListener, String code){
+        Thread t = new Thread() {
+            @Override
+            @TargetApi(Build.VERSION_CODES.M)
+            public void run() {
+                final RequestQueue requestQueue = Volley.newRequestQueue(HealthActivity.this);
                 String playlist_idFast = "spotify:playlist:37i9dQZF1DX8jnAPF7Iiqp";
                 String server_urlpostFast = "https://api.spotify.com/v1/playlists/37i9dQZF1DX8jnAPF7Iiqp/tracks/?fields=items(track(id))";
 
@@ -394,41 +473,59 @@ public class HealthActivity extends AppCompatActivity {
                         error.printStackTrace();
                         requestQueue.stop();
                     }
-                }){
+                }) {
                     @Override
                     public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String,String> headers=new HashMap<String,String>();
-                        android.util.Log.d("token = ", accessToken);
+                        Map<String, String> headers = new HashMap<String, String>();
+                        android.util.Log.d("token = ", code);
                         headers.put("Authorization", "Bearer " + code);
                         return headers;
                     }
                 };
-
                 //Starts Request
-                requestQueue.add(stringRequestpostSlow);
                 requestQueue.add(stringRequestpostFast);
-
             }
         };
-        t.start();
-    }
+            t.start();
+        }
 
-    public void backSong(View view){
+
+
+        public void backSong(View view){
         mSpotifyAppRemote.getPlayerApi().skipPrevious();
     }
 
     public void playSong(View view){
-        // Subscribe to PlayerState
-       if (isPaused){
+        Button b = findViewById(R.id.playSong);
+
+       if (playerState.isPaused){
            mSpotifyAppRemote.getPlayerApi().resume();
-           isPaused = false;
+           b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause_black_24dp, 0, 0, 0);
+           replayIgnore = true;
        } else {
            mSpotifyAppRemote.getPlayerApi().pause();
-           isPaused = true;
+           b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play_arrow_black_24dp, 0, 0, 0);
+           replayIgnore = true;
        }
     }
 
     public void nextSong(View view){
-        mSpotifyAppRemote.getPlayerApi().skipNext();
-    }
+
+//        CallResult<Empty> playerStateCall = mSpotifyAppRemote.getPlayerApi().skipNext();
+//        Result<Empty> playerStateResult = playerStateCall.await(10, TimeUnit.MILLISECONDS);
+       // if(!playerStateResult.isSuccessful()){
+            TextView tv = findViewById(R.id.heartRateTextView);
+            int currentHeartRate = Integer.valueOf(tv.getText().toString());
+            EditText et = findViewById(R.id.targetHeartRateEditView);
+            int targetHeartRate = Integer.valueOf(et.getText().toString());
+
+            if(currentHeartRate >= targetHeartRate){
+                mSpotifyAppRemote.getPlayerApi().play("spotify:track:" +fastSongs[(int)(Math.random() * ((fastSongs.length) + 1))]);
+            } else{
+                mSpotifyAppRemote.getPlayerApi().play("spotify:track:" +slowSongs[(int)(Math.random() * ((slowSongs.length) + 1))]);
+            }
+        }
+
+
+
 }

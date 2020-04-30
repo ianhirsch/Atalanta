@@ -9,6 +9,5 @@
     <string name="ok">OK</string>
     <string name="api_key">"AIzaSyDV-fUSqgC9xtlGOEBslap-vZm9ZzKwN3w"</string>
     <string name='spotifyClientID'>"94dcadb5863349829ae406bae1fff241"</string>
-    <string name='spotifyEncoded'>OTRkY2FkYjU4NjMzNDk4MjlhZTQwNmJhZTFmZmYyNDE6MDgxMDI0NmFiOGZhNDM0MTk4ZTBkNmMwYzg2MzAyZDc</string>
     <!--<string name="api_key">"AIzaSyDsyQI1UYFtuk_e4_wUefNC-pkM_87tNyk"</string>-->
 </resources>
