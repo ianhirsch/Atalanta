@@ -118,11 +118,6 @@ public class MainActivity extends FragmentActivity {
         fragmentTransaction.commit(); // save the changes
     }
 
-
-    public void startSpotify(View view){
-        Intent intent = new Intent(this, SpotifyFragment.class);
-        startActivity(intent);
-    }
 }
 
 

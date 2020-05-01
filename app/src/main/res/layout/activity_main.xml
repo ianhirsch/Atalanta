@@ -6,15 +6,6 @@
     android:id="@+id/fragment_map"
     android:name="com.google.android.gms.maps.SupportMapFragment">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Test"
-        android:id="@+id/test_button"
-        android:onClick="startSpotify"
-        />
-
-
     <FrameLayout
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"

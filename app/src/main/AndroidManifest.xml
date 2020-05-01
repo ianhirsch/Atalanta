@@ -21,7 +21,6 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".GenerateDistance" />
         <activity android:name=".GenerateDestination" />
-        <activity android:name=".SpotifyFragment"/>
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
