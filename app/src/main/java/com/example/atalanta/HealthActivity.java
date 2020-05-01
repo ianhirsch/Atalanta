@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,7 +29,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.example.atalanta.logger.Log;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataSet;
@@ -70,6 +70,7 @@ public class HealthActivity extends AppCompatActivity {
     private Boolean isPaused = false;
     private PlayerState playerState = null;
     private Boolean replayIgnore = false;
+    private String oldTrackInfo = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +154,13 @@ public class HealthActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        //connected();
+    }
+
     public void signInSpotify(){
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(CLIENT_ID)
@@ -193,22 +201,28 @@ public class HealthActivity extends AppCompatActivity {
                     }
                     this.playerState = playerState;
 
+                    String currentTrackInfo = track.name + track.artist.name;
+
                     TextView tv = findViewById(R.id.heartRateTextView);
                     int currentHeartRate = Integer.valueOf(tv.getText().toString());
                     EditText et = findViewById(R.id.targetHeartRateEditView);
                     int targetHeartRate = Integer.valueOf(et.getText().toString());
 
-                    if(!replayIgnore) {
+                    if(!replayIgnore && currentTrackInfo == oldTrackInfo) {
                         if (currentHeartRate >= targetHeartRate) {
+                            oldTrackInfo = currentTrackInfo;
                             mSpotifyAppRemote.getPlayerApi().play("spotify:track:" + fastSongs[(int) (Math.random() * ((fastSongs.length) + 1))]);
                             Button b = findViewById(R.id.playSong);
                             b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause_black_24dp, 0, 0, 0);
                             replayIgnore = false;
+
                         } else {
+                            oldTrackInfo = currentTrackInfo;
                             mSpotifyAppRemote.getPlayerApi().play("spotify:track:" + slowSongs[(int) (Math.random() * ((slowSongs.length) + 1))]);
                             Button b = findViewById(R.id.playSong);
                             b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause_black_24dp, 0, 0, 0);
                             replayIgnore = false;
+
                         }
                     }
 
@@ -514,15 +528,21 @@ public class HealthActivity extends AppCompatActivity {
 //        CallResult<Empty> playerStateCall = mSpotifyAppRemote.getPlayerApi().skipNext();
 //        Result<Empty> playerStateResult = playerStateCall.await(10, TimeUnit.MILLISECONDS);
        // if(!playerStateResult.isSuccessful()){
-            TextView tv = findViewById(R.id.heartRateTextView);
+            TextView tv = findViewById(R.id.heartRateValueTextView);
             int currentHeartRate = Integer.valueOf(tv.getText().toString());
             EditText et = findViewById(R.id.targetHeartRateEditView);
             int targetHeartRate = Integer.valueOf(et.getText().toString());
 
+            String currentTrackInfo = playerState.track.name + playerState.track.artist.name;
+
             if(currentHeartRate >= targetHeartRate){
+                oldTrackInfo = currentTrackInfo;
                 mSpotifyAppRemote.getPlayerApi().play("spotify:track:" +fastSongs[(int)(Math.random() * ((fastSongs.length) + 1))]);
+
             } else{
+                oldTrackInfo = currentTrackInfo;
                 mSpotifyAppRemote.getPlayerApi().play("spotify:track:" +slowSongs[(int)(Math.random() * ((slowSongs.length) + 1))]);
+
             }
         }
 
