@@ -6,11 +6,74 @@
     android:id="@+id/fragment_map"
     android:name="com.google.android.gms.maps.SupportMapFragment">
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|top"
+        android:text="test"
+        android:padding="10dp"
+        android:layout_marginTop="20dp"
+        android:paddingRight="10dp"
+        android:id="@+id/test_button"/>
+
     <FrameLayout
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="10dp" />
 
-</fragment>
+    <!-- Navigation Bar -->
+    <Button
+        android:id="@+id/navHealth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom"
+        android:padding="10dp"
+        android:layout_marginBottom="0dp"
+        android:drawableTop="@drawable/ic_health"
+        android:background="@color/quantum_googred"
+        android:text="Health"
+        android:textSize="24sp"/>
 
+    <Button
+        android:id="@+id/navProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom"
+        android:layout_marginStart="111dp"
+        android:layout_marginLeft="111dp"
+        android:padding="10dp"
+        android:layout_marginBottom="0dp"
+        android:drawableTop="@drawable/ic_person_black_24dp"
+        android:background="@color/quantum_indigo100"
+        android:text="Profile"
+        android:textSize="24sp"/>
+
+    <Spinner
+        android:id="@+id/milesNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom"
+        android:padding="12dp"
+        android:paddingRight="5dp"
+        android:layout_marginBottom="0dp"
+        android:layout_marginStart="225dp"
+        android:layout_marginLeft="225dp"
+        android:background="@color/quantum_white_100"/>
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom"
+        android:layout_marginBottom="40dp"
+        android:paddingVertical="5dp"
+        android:textSize="18sp"
+        android:paddingHorizontal="16dp"
+        android:textColor="@color/quantum_black_100"
+        android:layout_marginStart="225dp"
+        android:layout_marginLeft="225dp"
+        android:background="@color/quantum_white_100"
+        android:text="MODE" />
+
+</fragment>

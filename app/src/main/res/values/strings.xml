@@ -10,4 +10,20 @@
     <string name="api_key">"AIzaSyDV-fUSqgC9xtlGOEBslap-vZm9ZzKwN3w"</string>
     <string name='spotifyClientID'>"94dcadb5863349829ae406bae1fff241"</string>
     <!--<string name="api_key">"AIzaSyDsyQI1UYFtuk_e4_wUefNC-pkM_87tNyk"</string>-->
+    <string name="direction_api_key">"uBMk7kAYfCfyvvYa8DyUBnEdmXgW6wg8"</string>
+
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="signed_in">Signed In</string>
+    <string name="signed_out">Signed Out</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="create_account">No account yet? Create one</string>
+    <string name="verify_email">Verify email</string>
+    <string name="emailpassword_title_text">Your Profile Page</string>
+    <string name="reload">Email verified?</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>
