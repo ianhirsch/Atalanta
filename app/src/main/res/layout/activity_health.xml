@@ -1,57 +1,254 @@
-<!--
-Copyright 2014 Google, Inc.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
- http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/health_activity_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="16dp"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
+    android:paddingTop="8dp"
     android:paddingBottom="16dp"
     tools:context=".HealthActivity">
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/backToMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
         android:clickable="true"
+        android:onClick="onBackToMainButtonClick"
         app:backgroundTint="#FFFFFF"
         app:borderWidth="0dp"
         app:elevation="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:rippleColor="#FFFFFF"
-        app:srcCompat="?attr/homeAsUpIndicator"
-        android:onClick="onBackToMainButtonClick"/>
+        app:srcCompat="?attr/homeAsUpIndicator" />
 
-    <TextView
-        android:id="@+id/title_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/backToMain"
-        android:text="@string/intro_text"
-        app:layout_constraintTop_toBottomOf="@id/backToMain" />
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        app:layout_constraintTop_toBottomOf="@id/title_text_view"
-        android:layout_below="@id/title_text_view">
-        <com.example.atalanta.logger.LogView
-            android:id="@+id/sample_logview"
-            android:layout_width="wrap_content"
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card"
+            android:layout_below="@id/cardWebView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical" />
-    </ScrollView>
+            android:layout_margin="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Title, secondary and supporting text -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="3dp"
+                    android:text="Great Work!"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:textSize="28dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card2"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="4dp">
+
+                        <TextView
+                            android:id="@+id/distanceTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="3dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Distance:"
+                            android:textAppearance="?attr/textAppearanceBody2"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="16dp" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card3"
+                    android:layout_width="65dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp">
+
+                        <TextView
+                        android:id="@+id/stepsTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="3dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Steps:"
+                        android:textAppearance="?attr/textAppearanceBody2"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16dp" />
+                </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card4"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="4dp">
+
+                        <TextView
+                            android:id="@+id/heartRateTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="3dp"
+                            android:layout_marginTop="8dp"
+                            android:text="96"
+                            android:textAppearance="?attr/textAppearanceBody2"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="16dp" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+
+        </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardWebView"
+        android:layout_below="@id/backToMain"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_margin="8dp"
+        android:padding="16dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="20dp"
+                android:layout_marginTop="40dp"
+                android:layout_marginBottom="5dp"
+                android:layout_centerInParent="true"
+                android:textAlignment="center"
+                android:id="@+id/songText">
+            </TextView>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/relLay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="90dp">
+
+            <Button
+                android:id="@+id/backSong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginEnd="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_toStartOf="@+id/playSong"
+                android:layout_toLeftOf="@+id/playSong"
+                android:drawableLeft="@drawable/ic_keyboard_arrow_left_black_24dp"
+                android:onClick="backSong">
+
+            </Button>
+
+            <Button
+                android:id="@+id/playSong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:drawableLeft="@drawable/ic_play_arrow_black_24dp"
+                android:onClick="playSong">
+
+            </Button>
+
+            <Button
+                android:id="@+id/nextSong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginEnd="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_toEndOf="@+id/playSong"
+                android:layout_toRightOf="@+id/playSong"
+                android:drawableLeft="@drawable/ic_keyboard_arrow_right_black_24dp"
+                android:onClick="nextSong">
+            </Button>
+
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardWebView2"
+        android:layout_below="@id/card"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_margin="8dp"
+        android:padding="16dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <TextView
+                android:layout_width="209dp"
+                android:layout_height="32dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="81dp"
+                android:layout_marginLeft="81dp"
+                android:layout_marginTop="22dp"
+                android:layout_marginEnd="81dp"
+                android:layout_marginRight="81dp"
+                android:text="Set your target heart rate (BPM):">
+
+            </TextView>
+
+            <EditText
+                android:id="@+id/targetHeartRateEditView"
+                android:layout_width="242dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="64dp"
+                android:layout_marginLeft="64dp"
+                android:layout_marginTop="35dp"
+                android:layout_marginEnd="37dp"
+                android:layout_marginRight="37dp"
+                android:layout_marginBottom="50dp"
+                android:textAlignment="center"
+                android:text="96" />
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
 </RelativeLayout>

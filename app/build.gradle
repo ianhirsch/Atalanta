@@ -23,6 +23,12 @@ android {
         targetCompatibility = 1.8
     }
 
+    repositories {
+    mavenCentral()
+    flatDir {
+      dirs 'libs'
+      }
+    }
 }
 
 
@@ -48,4 +54,9 @@ dependencies {
     implementation 'com.android.volley:volley:1.1.0'
 
     implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
+    
+    implementation 'com.spotify.android:auth:1.1.0'
+    implementation project(path: ':spotify-app-remote')
+    implementation project(path: ':spotify-auth-release-1.2.1')
+    implementation 'com.android.support:cardview-v7:28.0.0'
 }

@@ -1,14 +1,14 @@
 <resources>
     <string name="app_name">Atalanta</string>
-    <string name="intro_text">Behold, a data dump from the Fitness API! Check the menu for more actions!</string>
     <string name="action_delete_session">Delete session</string>
-    <string name="action_settings">Settings</string>
+    <string name="sign_out">Sign Out</string>
     <string name="permission_rationale">Location data is used as part of the Google Fit API</string>
     <string name="permission_denied_explanation">Permission was denied, but is needed for core
         functionality.</string>
     <string name="settings">Settings</string>
     <string name="ok">OK</string>
     <string name="api_key">"AIzaSyDV-fUSqgC9xtlGOEBslap-vZm9ZzKwN3w"</string>
+    <string name='spotifyClientID'>"94dcadb5863349829ae406bae1fff241"</string>
     <!--<string name="api_key">"AIzaSyDsyQI1UYFtuk_e4_wUefNC-pkM_87tNyk"</string>-->
     <string name="direction_api_key">"uBMk7kAYfCfyvvYa8DyUBnEdmXgW6wg8"</string>
 
