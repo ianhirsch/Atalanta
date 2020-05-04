@@ -3,8 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     tools:context=".HealthActivity" >
 
+    <item android:id="@+id/signInSpotify"
+        android:title="Sign into Spotify"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item android:id="@+id/signInGoogleFit"
+        android:title="Sign into Google Fit"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+
     <item android:id="@+id/refreshData"
         android:title="Refresh Fitness Data"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item android:id="@+id/signOut"
+        android:title="Sign Out of All Accounts"
         android:orderInCategory="100"
         app:showAsAction="never" />
 </menu>

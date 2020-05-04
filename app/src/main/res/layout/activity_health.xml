@@ -19,7 +19,6 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:clickable="true"
         android:onClick="onBackToMainButtonClick"
@@ -43,7 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="8dp">
 
                 <!-- Title, secondary and supporting text -->
                 <TextView
@@ -52,7 +51,7 @@
                     android:layout_marginBottom="3dp"
                     android:text="Great Work!"
                     android:textAppearance="?attr/textAppearanceHeadline6"
-                    android:textSize="28dp" />
+                    android:textSize="22dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -143,14 +142,16 @@
         android:id="@+id/cardWebView"
         android:layout_below="@id/backToMain"
         android:layout_width="match_parent"
-        android:layout_height="160dp"
+        android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:padding="16dp">
+        android:padding="8dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:id="@+id/songTextLay"
+            android:paddingBottom="5dp"
             >
 
             <TextView
@@ -158,10 +159,10 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textColor="?android:attr/textColorSecondary"
-                android:textSize="20dp"
-                android:layout_marginTop="40dp"
-                android:layout_marginBottom="5dp"
+                android:textSize="18dp"
+
                 android:layout_centerInParent="true"
+                android:gravity="center_horizontal"
                 android:textAlignment="center"
                 android:id="@+id/songText">
             </TextView>
@@ -170,6 +171,7 @@
 
         <RelativeLayout
             android:id="@+id/relLay"
+            android:layout_below="@+id/songTextLay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -197,6 +199,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:background="@android:color/background_light"
                 android:drawableLeft="@drawable/ic_play_arrow_black_24dp"
                 android:onClick="playSong">
 
@@ -235,7 +238,7 @@
 
 
             <TextView
-                android:layout_width="209dp"
+                android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
@@ -245,27 +248,28 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginStart="81dp"
                 android:layout_marginLeft="81dp"
-                android:layout_marginTop="22dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="81dp"
                 android:layout_marginRight="81dp"
+                android:id="@+id/setHeartRateTextView"
                 android:text="Set your target heart rate (BPM):">
 
             </TextView>
 
             <EditText
                 android:id="@+id/targetHeartRateEditView"
+                android:layout_below="@id/setHeartRateTextView"
                 android:layout_width="242dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginStart="64dp"
                 android:layout_marginLeft="64dp"
-                android:layout_marginTop="35dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="37dp"
                 android:layout_marginRight="37dp"
-                android:layout_marginBottom="50dp"
+                android:gravity="center_horizontal"
                 android:textAlignment="center"
                 android:text="96" />
         </RelativeLayout>

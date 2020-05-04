@@ -53,11 +53,7 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 public class HealthActivity extends AppCompatActivity {
 
@@ -71,6 +67,8 @@ public class HealthActivity extends AppCompatActivity {
     private PlayerState playerState = null;
     private Boolean replayIgnore = false;
     private String oldTrackInfo = "";
+    private Boolean signedIntoSpotify = false;
+    private Boolean signedIntoGoogleFit = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,28 +121,8 @@ public class HealthActivity extends AppCompatActivity {
             }
         }, false);
 
-        FitnessOptions fitnessOptions =
-                FitnessOptions.builder()
-                        .addDataType(DataType.TYPE_DISTANCE_CUMULATIVE)
-                        .addDataType(DataType.TYPE_DISTANCE_DELTA)
-                        .addDataType(DataType.TYPE_STEP_COUNT_CUMULATIVE)
-                        .addDataType(DataType.TYPE_STEP_COUNT_DELTA)
-                        .build();
-        if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(this), fitnessOptions)) {
-            GoogleSignIn.requestPermissions(
-                    this,
-                    REQUEST_OAUTH_REQUEST_CODE,
-                    GoogleSignIn.getLastSignedInAccount(this),
-                    fitnessOptions);
-        } else {
-            subscribe();
-            readData();
-        }
-        if (SpotifyAppRemote.isSpotifyInstalled(this)){
-            signInSpotify();
-        } else {
-            Toast.makeText(this, "Must have Spotify installed to listen to music.", Toast.LENGTH_SHORT).show();
-        }
+        signInGoogleFit();
+
         }
 
 
@@ -157,8 +135,39 @@ public class HealthActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
+        if (SpotifyAppRemote.isSpotifyInstalled(this)){
+             signInSpotify();
+        } else {
+            Toast.makeText(this, "Must have Spotify installed to listen to music.", Toast.LENGTH_SHORT).show();
+            TextView tv = findViewById(R.id.songText);
+            signedIntoSpotify = false;
+        }
+    }
 
-        //connected();
+    public void signInGoogleFit(){
+        FitnessOptions fitnessOptions =
+                FitnessOptions.builder()
+                        .addDataType(DataType.TYPE_DISTANCE_CUMULATIVE)
+                        .addDataType(DataType.TYPE_DISTANCE_DELTA)
+                        .addDataType(DataType.TYPE_STEP_COUNT_CUMULATIVE)
+                        .addDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                        .build();
+        if (!signedIntoGoogleFit) {
+            GoogleSignIn.requestPermissions(
+                    this,
+                    REQUEST_OAUTH_REQUEST_CODE,
+                    GoogleSignIn.getLastSignedInAccount(this),
+                    fitnessOptions);
+            if(GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(this), fitnessOptions)){
+               signedIntoGoogleFit = true;
+                subscribe();
+                readData();
+            }
+        } else {
+            signedIntoGoogleFit = true;
+            subscribe();
+            readData();
+        }
     }
 
     public void signInSpotify(){
@@ -174,7 +183,14 @@ public class HealthActivity extends AppCompatActivity {
                     public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                         mSpotifyAppRemote = spotifyAppRemote;
                         android.util.Log.d("HealthAcitivty", "Connected! Yay!");
+                        signedIntoSpotify = true;
                         connected();
+                        Button b = findViewById(R.id.nextSong);
+                        b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_keyboard_arrow_right_black_24dp, 0, 0, 0);
+                        b = findViewById(R.id.backSong);
+                        b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_keyboard_arrow_left_black_24dp, 0, 0, 0);
+                        b = findViewById(R.id.playSong);
+                        b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play_arrow_black_24dp, 0, 0, 0);
                         // Now you can start interacting with App Remote
 
                     }
@@ -188,7 +204,6 @@ public class HealthActivity extends AppCompatActivity {
     }
 
     private void connected() {
-
         // Subscribe to PlayerState
         mSpotifyAppRemote.getPlayerApi()
                 .subscribeToPlayerState()
@@ -340,6 +355,29 @@ public class HealthActivity extends AppCompatActivity {
             readData();
             return true;
         }
+        if (id == R.id.signOut){
+            signOut();
+            return true;
+        }
+        if(id == R.id.signInSpotify){
+            if (!signedIntoSpotify){
+                signInSpotify();
+            }
+            return true;
+        }
+        if(id == R.id.signInSpotify){
+            if (!signedIntoSpotify){
+                signInSpotify();
+            }
+            return true;
+        }
+        if(id == R.id.signInGoogleFit){
+            if (!signedIntoGoogleFit){
+                signInGoogleFit();
+            }
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -356,9 +394,13 @@ public class HealthActivity extends AppCompatActivity {
 
     //TODO: Move to profile page
     private void signOut() {
-        Context context = getApplicationContext();
-        Fitness.getConfigClient(context, GoogleSignIn.getLastSignedInAccount(context)).disableFit();
+        Fitness.getConfigClient(this, GoogleSignIn.getLastSignedInAccount(this)).disableFit();
+        signedIntoGoogleFit = false;
         SpotifyAppRemote.disconnect(mSpotifyAppRemote);
+        signedIntoSpotify = false;
+        TextView tv = findViewById(R.id.songText);
+        tv.setText("");
+        Toast.makeText(this, "Signed Out of Google Fit and Spotify", Toast.LENGTH_SHORT).show();
     }
 
     private void requestPlaylistInfo(final ResponseListener responseListener, Boolean isSlow){
@@ -506,28 +548,40 @@ public class HealthActivity extends AppCompatActivity {
 
 
         public void backSong(View view){
-        mSpotifyAppRemote.getPlayerApi().skipPrevious();
+        if (!signedIntoSpotify){
+            Toast.makeText(this, "Must Sign in to Spotify to use.", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
+            mSpotifyAppRemote.getPlayerApi().skipPrevious();
+            Button b = findViewById(R.id.playSong);
+            b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause_black_24dp, 0, 0, 0);
+        }
     }
 
     public void playSong(View view){
-        Button b = findViewById(R.id.playSong);
+        if (!signedIntoSpotify){
+            Toast.makeText(this, "Must Sign in to Spotify to use.", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
+            Button b = findViewById(R.id.playSong);
 
-       if (playerState.isPaused){
-           mSpotifyAppRemote.getPlayerApi().resume();
-           b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause_black_24dp, 0, 0, 0);
-           replayIgnore = true;
-       } else {
-           mSpotifyAppRemote.getPlayerApi().pause();
-           b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play_arrow_black_24dp, 0, 0, 0);
-           replayIgnore = true;
-       }
+            if (playerState.isPaused) {
+                mSpotifyAppRemote.getPlayerApi().resume();
+                b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause_black_24dp, 0, 0, 0);
+                replayIgnore = true;
+            } else {
+                mSpotifyAppRemote.getPlayerApi().pause();
+                b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play_arrow_black_24dp, 0, 0, 0);
+                replayIgnore = true;
+            }
+        }
     }
 
     public void nextSong(View view){
-
-//        CallResult<Empty> playerStateCall = mSpotifyAppRemote.getPlayerApi().skipNext();
-//        Result<Empty> playerStateResult = playerStateCall.await(10, TimeUnit.MILLISECONDS);
-       // if(!playerStateResult.isSuccessful()){
+        if (!signedIntoSpotify){
+            Toast.makeText(this, "Must Sign in to Spotify to use.", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
             TextView tv = findViewById(R.id.heartRateValueTextView);
             int currentHeartRate = Integer.valueOf(tv.getText().toString());
             EditText et = findViewById(R.id.targetHeartRateEditView);
@@ -535,15 +589,20 @@ public class HealthActivity extends AppCompatActivity {
 
             String currentTrackInfo = playerState.track.name + playerState.track.artist.name;
 
-            if(currentHeartRate >= targetHeartRate){
+            if (currentHeartRate >= targetHeartRate) {
                 oldTrackInfo = currentTrackInfo;
-                mSpotifyAppRemote.getPlayerApi().play("spotify:track:" +fastSongs[(int)(Math.random() * ((fastSongs.length) + 1))]);
+                mSpotifyAppRemote.getPlayerApi().play("spotify:track:" + fastSongs[(int) (Math.random() * ((fastSongs.length) + 1))]);
+                Button b = findViewById(R.id.playSong);
+                b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause_black_24dp, 0, 0, 0);
 
-            } else{
+            } else {
                 oldTrackInfo = currentTrackInfo;
-                mSpotifyAppRemote.getPlayerApi().play("spotify:track:" +slowSongs[(int)(Math.random() * ((slowSongs.length) + 1))]);
+                mSpotifyAppRemote.getPlayerApi().play("spotify:track:" + slowSongs[(int) (Math.random() * ((slowSongs.length) + 1))]);
+                Button b = findViewById(R.id.playSong);
+                b.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause_black_24dp, 0, 0, 0);
 
             }
+        }
         }
 
 
