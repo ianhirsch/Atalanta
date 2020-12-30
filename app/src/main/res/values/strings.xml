@@ -6,10 +6,10 @@
         functionality.</string>
     <string name="settings">Settings</string>
     <string name="ok">OK</string>
-    <string name="api_key">"AIzaSyDV-fUSqgC9xtlGOEBslap-vZm9ZzKwN3w"</string>
-    <string name='spotifyClientID'>"94dcadb5863349829ae406bae1fff241"</string>
-    <!--<string name="api_key">"AIzaSyDsyQI1UYFtuk_e4_wUefNC-pkM_87tNyk"</string>-->
-    <string name="direction_api_key">"uBMk7kAYfCfyvvYa8DyUBnEdmXgW6wg8"</string>
+    <string name="api_key">""</string>
+    <string name='spotifyClientID'>""</string>
+    <!--<string name="api_key">""</string>-->
+    <string name="direction_api_key">""</string>
 
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
